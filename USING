@@ -1,0 +1,22 @@
+LOGGING IN
+Click the "Sign In" button. The browser will pop up a dialog asking for your
+user id and password (this is your WebWebX user id and password, not the one
+you logged in with!).
+
+Since WebWebX uses the basic authorization feature of HTTP, your password is
+not safe against sniffing. Use a secure Web server if you want to get around
+that problem.
+
+EDITING PAGES
+Click on the "Edit Page" link to get a scrolling textbox containing the
+page text. WebWebX uses a simplified markup language to make it harder to 
+include nasties like evil Javascript, etc.
+
+If you decide you don't want to edit the page, click on the "Break Edit Lock"
+link. Otherwise, make your changes and click on save. You'll see an updated
+version of the page.
+
+
+
+
+

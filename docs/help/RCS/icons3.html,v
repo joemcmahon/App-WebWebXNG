@@ -1,0 +1,71 @@
+head	1.1;
+access;
+symbols
+	2_1_5:1.1
+	2_1_4:1.1
+	2_1_3:1.1
+	2_1_2:1.1
+	2_1_1:1.1
+	2_1:1.1;
+locks; strict;
+comment	@# @;
+
+
+1.1
+date	99.01.21.16.27.56;	author joe;	state Exp;
+branches;
+next	;
+
+
+desc
+@base version as of 2.1
+@
+
+
+1.1
+log
+@Initial revision
+@
+text
+@<html>
+<head>
+<title>Overview of icons 3/5</title>
+</head>
+
+<body text="#000000" bgcolor="#ffffff">
+
+<center>
+<h2><img src="bubble.gif" align=middle>Overview of icons</h2>
+</center>
+
+<h3>Edit Options</h3>
+
+<table border=0 width="100%">
+
+<tr valign=top>
+
+<td align=center><img src="../icons/edit.gif"></td><td>
+
+<strong>Edit Page</strong><br>
+	This icon displays a form which allows you to edit the contents
+	of the current page.
+
+</td></tr><tr valign=top>
+
+<td align=center><img src="../icons/links.gif"></td><td>
+
+<strong>Edit Links</strong><br>
+	This icon changes all of the links on the page so that clicking
+	on them will allow you to edit them.
+
+</td></tr></table> <p>
+
+<center>
+<a href="icons2.html"><img src="left.gif" border=0></a>
+<a href="icons4.html"><img src="right.gif" border=0></a> <p>
+<a href="index.html"><img src="line.gif" alt="Back" border=0></a> <p>
+</center>
+
+</body>
+</html>
+@

@@ -1,0 +1,77 @@
+head	1.1;
+access;
+symbols
+	2_1_5:1.1
+	2_1_4:1.1
+	2_1_3:1.1
+	2_1_2:1.1
+	2_1_1:1.1
+	2_1:1.1;
+locks; strict;
+comment	@# @;
+
+
+1.1
+date	99.01.21.16.27.56;	author joe;	state Exp;
+branches;
+next	;
+
+
+desc
+@base version as of 2.1
+@
+
+
+1.1
+log
+@Initial revision
+@
+text
+@<!--This file created 1/15/98 8:54 PM by Claris Home Page version 1.0-->
+<HTML>
+<HEAD>
+   <TITLE>WebWeb administration 1/3</TITLE>
+   <META NAME=GENERATOR CONTENT="Claris Home Page 1.0">
+   <X-SAS-WINDOW TOP=42 BOTTOM=597 LEFT=4 RIGHT=534>
+</HEAD>
+<BODY BGCOLOR="#FFFFFF">
+
+<H2 ALIGN=CENTER><IMG SRC="bubble.gif" WIDTH=61 HEIGHT=49
+X-SAS-UseImageWidth X-SAS-UseImageHeight ALIGN=middle>WebWeb
+administration</H2>
+
+<H4>Creating a new Web</H4>
+
+<P>A new web is created by making a symbolic link to the WebWeb
+script on the server. When the new web is first accessed, the
+administration page will be displayed until the settings have been
+accepted.</P>
+
+<P>Note that the current WebWeb server is installed in a secured
+area. This has the advantage that we can require all users to log in
+to the WebWeb, guaranteeing that random intruders cannot easily
+obtain access to the page contents; however, this also means that the
+administrator of the new WebWeb will need to set up a .htaccess file
+and htpasswd database.</P>
+
+<H4>Administration</H4>
+
+<P>The web administrator can access the administration page at any
+other time by clicking on the administration icon:</P>
+
+<P><IMG SRC="../icons/admin.gif" WIDTH=29 HEIGHT=22
+X-SAS-UseImageWidth X-SAS-UseImageHeight ALIGN=bottom></P>
+
+<P>If icons are turned off, the "Administration" toolbar entry
+provides the same function.</P>
+
+<P ALIGN=CENTER><A HREF="admin2.html"><IMG SRC="right.gif" WIDTH=39
+HEIGHT=36 X-SAS-UseImageWidth X-SAS-UseImageHeight BORDER=0
+ALIGN=bottom></A></P>
+
+<P ALIGN=CENTER><A HREF="index.html"><IMG SRC="line.gif" ALT="Back"
+WIDTH=312 HEIGHT=79 X-SAS-UseImageWidth X-SAS-UseImageHeight BORDER=0
+ALIGN=bottom></A></P>
+</BODY>
+</HTML>
+@

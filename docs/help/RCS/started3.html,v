@@ -1,0 +1,85 @@
+head	1.1;
+access;
+symbols
+	2_1_5:1.1
+	2_1_4:1.1
+	2_1_3:1.1
+	2_1_2:1.1
+	2_1_1:1.1
+	2_1:1.1;
+locks; strict;
+comment	@# @;
+
+
+1.1
+date	99.01.21.16.27.56;	author joe;	state Exp;
+branches;
+next	;
+
+
+desc
+@base version as of 2.1
+@
+
+
+1.1
+log
+@Initial revision
+@
+text
+@<html>
+<head>
+<title>Getting started 3/4</title>
+</head>
+
+<body text="#000000" bgcolor="#ffffff">
+
+<center>
+<h2><img src="bubble.gif" alt="" align=middle> Getting started</h2>
+</center>
+
+<h4>Properties</h4>
+
+Each page has a list of properties besides its content which
+determines the operation you can perform upon it. Each page
+has
+<UL>
+<li>an owner
+<li>three access control lists for viewing, editing and internal modification, 
+<li>various flags for setting archiving, email notification, and so on.
+</UL>
+These properties
+can be accessed by clicking on the properties icon (or "Properties" link, if icons are turned off): <p>
+
+<img src="../icons/props.gif"> <p>
+
+If you do not own a page, then you may be restricted from
+modifying its internal properties, from editing its contents
+or even from viewing it at all, subject to the owner's desires. The WebWeb administrator always has access to all pages. <p>
+
+<h4>Page information</h4>
+
+If you do not have access to the page's properties you can
+still find out about the page by clicking on the page information
+icon (or the "Information" link, if icons are off): <p>
+
+<img src="../icons/info.gif"> <p>
+
+This will tell you who owns the page, when it was created and
+last edited, and its revision number (which indicates how much
+it has been edited in the past). If the page has any sort of access
+control in operation then this will be outlined. <p>
+
+If the page owner and web administrator have submitted their
+email addresses then you will also be given the chance to email
+them. <p>
+
+<center>
+<a href="started2.html"><img src="left.gif" border=0></a>
+<a href="started4.html"><img src="right.gif" border=0></a> <p>
+<a href="index.html"><img src="line.gif" alt="Back" border=0></a> <p>
+</center>
+
+</body>
+</html>
+@

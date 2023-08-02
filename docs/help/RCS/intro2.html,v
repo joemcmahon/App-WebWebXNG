@@ -1,0 +1,61 @@
+head	1.1;
+access;
+symbols
+	2_1_5:1.1
+	2_1_4:1.1
+	2_1_3:1.1
+	2_1_2:1.1
+	2_1_1:1.1
+	2_1:1.1;
+locks; strict;
+comment	@# @;
+
+
+1.1
+date	99.01.21.16.27.56;	author joe;	state Exp;
+branches;
+next	;
+
+
+desc
+@base version as of 2.1
+@
+
+
+1.1
+log
+@Initial revision
+@
+text
+@<html>
+<head>
+<title>Introduction 2/3</title>
+</head>
+
+<body text="#000000" bgcolor="#ffffff">
+
+<center>
+<h2><img src="bubble.gif" alt="" align=middle> Introduction</h2>
+</center>
+
+<h4>Origins</h4>
+
+The original idea for WebWeb came from Ward Cunningham's WikiWikiWeb
+program. WebWeb takes the idea of WikiWikiWeb and adds new features
+to it, such as access control, archiving, extended citations, email
+notification and more. <p>
+
+The original WikiWikiWeb is still great fun to use, although it
+requires a degree of maturity from all of its users, and doesn't provide the security, archival, and accountability features that WebWeb does. It can be found at
+<a href="http://c2.com/cgi/wiki">http://c2.com/cgi/wiki</a>. <p>
+
+
+<center>
+<a href="intro.html"><img src="left.gif" border=0>
+<a href="intro3.html"><img src="right.gif" border=0> <p>
+<a href="index.html"><img src="line.gif" alt="Back" border=0></a> <p>
+</center>
+
+</body>
+</html>
+@

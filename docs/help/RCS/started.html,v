@@ -1,0 +1,77 @@
+head	1.1;
+access;
+symbols
+	2_1_5:1.1
+	2_1_4:1.1
+	2_1_3:1.1
+	2_1_2:1.1
+	2_1_1:1.1
+	2_1:1.1;
+locks; strict;
+comment	@# @;
+
+
+1.1
+date	99.01.21.16.27.56;	author joe;	state Exp;
+branches;
+next	;
+
+
+desc
+@base version as of 2.1
+@
+
+
+1.1
+log
+@Initial revision
+@
+text
+@<html>
+<head>
+<title>Getting started 1/4</title>
+</head>
+
+<body text="#000000" bgcolor="#ffffff">
+
+<center>
+<h2><img src="bubble.gif" alt="" align=middle> Getting started</h2>
+</center>
+
+<h4>Registering your email address</h4>
+
+As your first task, you should register your email
+address with the system. Click on the edit email icon
+in the toolbar at the left side of the page. It looks
+like this: <p>
+
+<img src="../icons/editmail.gif"> <p>
+
+If icons have been turned off by the administrator, this will be replaced by a link reading "Set My Email Address".
+
+You will be asked to type in your email address. If your
+email address ever changes, you can edit your entry by clicking
+on the "edit email" icon/link again. <p>
+
+<h4>Adding your name to a notification list</h4>
+
+If you are interested in a particular page you can register
+with it. Whenever the page is changed you will receive
+an email (sent to your registered email address) telling you
+about the change. <p>
+
+Clicking on the notification icon will toggle your interest. To
+prevent accidental toggling you will be asked to confirm your
+decision. The notification icon looks like this: <p>
+
+<img src="../icons/mail.gif"> <p>
+
+If icons are turned off, the "Set Mail Notification" link in the toolbar does the same thing.
+<center>
+<a href="started2.html"><img src="right.gif" border=0></a> <p>
+<a href="index.html"><img src="line.gif" alt="Back" border=0></a> <p>
+</center>
+
+</body>
+</html>
+@

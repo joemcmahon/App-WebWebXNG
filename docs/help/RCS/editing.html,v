@@ -1,0 +1,101 @@
+head	1.2;
+access;
+symbols
+	2_1_5:1.2
+	2_1_4:1.2
+	2_1_3:1.2
+	2_1_2:1.2
+	2_1_1:1.1;
+locks; strict;
+comment	@# @;
+
+
+1.2
+date	99.02.23.19.00.04;	author joe;	state Exp;
+branches;
+next	1.1;
+
+1.1
+date	99.01.21.16.27.56;	author joe;	state Exp;
+branches;
+next	;
+
+
+desc
+@base version as of 2.1
+@
+
+
+1.2
+log
+@added note on double-backticks
+@
+text
+@<html>
+<head>
+<title>Editing pages 1/5</title>
+</head>
+
+<body text="#000000" bgcolor="#ffffff">
+
+<center>
+<h2><img src="bubble.gif" align=middle>Editing pages</h2>
+</center>
+
+<h4>How to edit a page</h4>
+
+You can edit a page by clicking on the edit button. This displays
+an editing area where you can alter the contents of the page, plus
+a "Save" button. Clicking on the "Save" button moves the current contents
+into the page's archive and puts your edited content in its place: <p>
+
+<img src="../icons/edit.gif"> <p>
+
+(The "Edit" toolbar entry corresponds to this icon when icons are off.)
+
+You can edit all of the citations and links within a page by clicking on the
+"Edit links" icon/link. This will highlight all of the citations. Clicking
+on them will display the associated URL which you can edit and
+save. This option also changes the internal references in the page so
+that clicking on them edits the referred page: <p>
+
+<img src="../icons/links.gif"> <p>
+
+You will see an "Edit Links" entry in the toolbar instead if icons are turned off.
+
+<h4>Adding references</h4>
+
+<ul>
+<li>Mentioning a WebWeb page by name automatically creates a
+	reference to that page. 
+<li>Mentioning a full URL will be hyperlinked automatically.
+<li>Citations can be used to insert links to URLs tidily (see
+	the formatting rules, next).
+<li>From time to time, you'll find that you may need to enter
+    something that looks like a WebWeb page name, but you
+    don't want WebWeb to make it into a link (this happens
+    a lot if you're documenting Perl or Java code). Put
+    two <b>backquotes</b> in front of it to keep WebWeb
+    from interpreting it, like so:
+<pre>
+        ``NotToBeLinked
+</pre>
+</ul>
+
+<center>
+<a href="editing2.html"><img src="right.gif" border=0></a> <p>
+<a href="index.html"><img src="line.gif" alt="Back" border=0></a> <p>
+</center>
+
+</body>
+</html>
+@
+
+
+1.1
+log
+@Initial revision
+@
+text
+@d41 9
+@

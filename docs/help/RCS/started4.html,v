@@ -1,0 +1,70 @@
+head	1.1;
+access;
+symbols
+	2_1_5:1.1
+	2_1_4:1.1
+	2_1_3:1.1
+	2_1_2:1.1
+	2_1_1:1.1
+	2_1:1.1;
+locks; strict;
+comment	@# @;
+
+
+1.1
+date	99.01.21.16.27.56;	author joe;	state Exp;
+branches;
+next	;
+
+
+desc
+@base version as of 2.1
+@
+
+
+1.1
+log
+@Initial revision
+@
+text
+@<html>
+<head>
+<title>Getting started 4/4</title>
+</head>
+
+<body text="#000000" bgcolor="#ffffff">
+
+<center>
+<h2><img src="bubble.gif" alt="" align=middle> Getting started</h2>
+</center>
+
+<h4>Archives</h4>
+
+Each page, by default, has an edit history called an archive. If somebody changes the contents of a page, the previous version is added to the top
+of the pages archive. You can browse through a page's archive by
+clicking on the archive icon (or the "Archived Versions" link, if icons are off): <p>
+
+<img src="../icons/archive.gif"> <p>
+
+All links and citations are stored alongside the page, so if you
+accidentally delete a link you can go into the archive to find
+the URL. <p>
+
+You can turn archiving off for any page that you either own or have "modify" access to, but it's recommended that you leave it on. If archiving is turned off for a page that was previously archived, the old archive remains, but is no longer updated when the most recent page is edited.
+
+<H4>Jumping to a page</H4>
+
+You can use a shorthand URL to directly access a page if you know its name:
+
+<CODE>http://webweb.server/path_to_webweb?PageName</CODE>
+
+This will take you directly to the page you want to access. If this page doesn't exist, you'll get a blank page, which you may then edit as you desire.
+
+<center>
+<a href="started3.html"><img src="left.gif" border=0></a> <p>
+<a href="index.html"><img src="line.gif" alt="Back" border=0></a> <p>
+</center>
+
+</body>
+</html>
+@

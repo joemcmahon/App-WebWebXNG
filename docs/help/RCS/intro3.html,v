@@ -1,0 +1,82 @@
+head	1.1;
+access;
+symbols
+	2_1_5:1.1
+	2_1_4:1.1
+	2_1_3:1.1
+	2_1_2:1.1
+	2_1_1:1.1
+	2_1:1.1;
+locks; strict;
+comment	@# @;
+
+
+1.1
+date	99.01.21.16.27.56;	author joe;	state Exp;
+branches;
+next	;
+
+
+desc
+@base version as of 2.1
+@
+
+
+1.1
+log
+@Initial revision
+@
+text
+@<html>
+<head>
+<title>Introduction 3/3</title>
+</head>
+
+<body text="#000000" bgcolor="#ffffff">
+
+<center>
+<h2><img src="bubble.gif" alt="" align=middle> Introduction</h2>
+</center>
+
+<h4>Possible Uses</h4>
+
+Like the original WikiWikiWeb, this program is designed to
+support collaboration. Many high-level conventions exist within
+WikiWikiWeb which impose a structure on information as it is
+added to the database. Hopefully, WebWeb gives users the tools
+to impose a finer degree of control on this process, rather
+than unneccessarily hindering them. <p>
+
+<dl>
+
+<dt>Chat System
+<dd>WebWeb can behave like an asynchronous chat system, existing
+	somewhere between threaded newsgroups and mailing lists.
+	The possibility of using special formatting rules and
+	including images should brighten up the proceedings. <p>
+
+<dt>Tutorial Server
+<dd>WebWeb's added security can limit access to a page, or group of
+	pages, to a particular set of people. Access control
+	can be used to allow a subset of the group to edit pages
+	and a select few 'administrators' to manage the overall
+	structure. For example: <p>
+
+	<ul>
+	<li>Students could write up their opinions, making them
+		world-readable, but allowing their tutor to add
+		comments and make changes.
+	<li>Smaller groups can have private, or moderated discussions
+		which can be as open or as closed as desired.
+	</ul> <p>
+
+</dl> <p>
+
+<center>
+<a href="intro2.html"><img src="left.gif" border=0> <p>
+<a href="index.html"><img src="line.gif" alt="Back" border=0></a> <p>
+</center>
+
+</body>
+</html>
+@

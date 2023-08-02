@@ -1,0 +1,51 @@
+<html>
+<head>
+<title>Editing pages 5/5</title>
+</head>
+
+<body text="#000000" bgcolor="#ffffff">
+
+<center>
+<h2><img src="bubble.gif" align=middle>Editing pages</h2>
+</center>
+
+<h4>Page locking and unlocking</h4>
+
+You will note that when you select a page for editing, you will see a 
+message that looks like this at the bottom of the page:
+<blockquote>
+<address>Being edited by SomeUser from nnn.nnn.nnn.nnn since Thu Jan 21 11:02:14 1999 </address>
+</blockquote>
+This message lets you know that you have the page locked; no one else may edit 
+it until either
+<ul>
+<li>you save the page
+<li>You click on the "Break Edit Lock" entry in the command bar
+<li>Someone else with edit access to the page clicks on the "Break Edit Lock"
+entry in the command bar
+</ul>
+If you access a page that is currently being edited by someone else, you will 
+see a similar message across the bottom of the page.
+<p>
+Note that breaking someone else's lock should be done only in a circumstance
+when you know that the other person is not editing the page or accidentally 
+left the page locked (e.g., by leaving the edit page without saving or
+breaking their own lock). Breaking a lock can lead to a race condition where
+something like the following happens:
+<ol>
+<li>UserOne starts editing SamplePage, locking it.
+<li>UserTwo gets impatient and breaks the lock on SamplePage and starts editing
+it.
+<li>UserOne saves SamplePage.
+<li>UserTwo saves SamplePage.
+<li>UserOne looks at SamplePage and wonders where the edits went. (They're actually in the previous, archived version of the page.)
+</ol>
+Bottom line: Don't break a lock unless you know that the locking user isn't at
+his/her tube, editing.
+<center>
+<a href="editing4.html"><img src="left.gif" border=0></a> <p>
+<a href="index.html"><img src="line.gif" alt="Back" border=0></a> <p>
+</center>
+
+</body>
+</html>

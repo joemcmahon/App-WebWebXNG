@@ -1,0 +1,79 @@
+head	1.1;
+access;
+symbols
+	2_1_5:1.1
+	2_1_4:1.1
+	2_1_3:1.1
+	2_1_2:1.1
+	2_1_1:1.1
+	2_1:1.1;
+locks; strict;
+comment	@# @;
+
+
+1.1
+date	99.01.21.16.27.56;	author joe;	state Exp;
+branches;
+next	;
+
+
+desc
+@base version as of 2.1
+@
+
+
+1.1
+log
+@Initial revision
+@
+text
+@<html>
+<head>
+<title>Properties and security 1/4</title>
+</head>
+
+<body text="#000000" bgcolor="#ffffff">
+
+<center>
+<h2><img src="bubble.gif" align=middle>Properties and security</h2>
+</center>
+
+<h4>Access control lists</h4>
+
+Normally, all pages are completely open to access by any WebWeb user; these
+pages may be edited, renamed, deleted - anything, by any user. You can use
+access control lists to change this, limiting who can do what to any given 
+page.
+
+There are three access control lists: read, edit and modify. The
+read list gives users permission to read the contents of the page.
+The edit list gives users permission to edit the contents of the
+page but nothing else. The modify lists gives users permission
+to modify the page's properties, and to copy, rename or delete the
+page. <p>
+
+The access lists are hierarchical, so a user with edit access also
+has read access, and a user with modify access also has read and
+edit access. <p>
+
+<ul>
+<li>If left blank (the default), every user in the system has access at that level.
+<li>A single <em>hypen</em> indicates that <I>no</I> users have access at that
+	level.
+<li>A comma or space separated list of usernames will allow those
+	users access, but no others.
+<li>If a name on the list starts with a <em>plus sign</em> then it
+	is interpreted as an <em>access control page</em> (see the
+	next help page).
+<li>The page owner and the web administrator automatically have full
+	access.
+</ul> <p>
+
+<center>
+<a href="props2.html"><img src="right.gif" border=0></a> <p>
+<a href="index.html"><img src="line.gif" alt="Back" border=0></a> <p>
+</center>
+
+</body>
+</html>
+@

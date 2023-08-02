@@ -1,0 +1,98 @@
+head	1.1;
+access;
+symbols
+	2_1_5:1.1
+	2_1_4:1.1
+	2_1_3:1.1
+	2_1_2:1.1
+	2_1_1:1.1
+	2_1:1.1;
+locks; strict;
+comment	@# @;
+
+
+1.1
+date	99.01.21.16.27.56;	author joe;	state Exp;
+branches;
+next	;
+
+
+desc
+@base version as of 2.1
+@
+
+
+1.1
+log
+@Initial revision
+@
+text
+@<!--This file created 1/15/98 9:05 PM by Claris Home Page version 1.0-->
+<HTML>
+<HEAD>
+   <TITLE>WebWeb administration 3/3</TITLE>
+   <META NAME=GENERATOR CONTENT="Claris Home Page 1.0">
+   <X-SAS-WINDOW TOP=42 BOTTOM=597 LEFT=4 RIGHT=534>
+</HEAD>
+<BODY BGCOLOR="#FFFFFF">
+
+<H2 ALIGN=CENTER><IMG SRC="bubble.gif" WIDTH=61 HEIGHT=49
+X-SAS-UseImageWidth X-SAS-UseImageHeight ALIGN=middle>WebWeb
+administration</H2>
+
+<H4>More options</H4>
+
+<DL>
+   <DT><B>Mail Sensitivity</B>
+   
+   <DD>This number defines the minimum time in minutes between each
+   email notification.
+   
+   <DT><B>Recent Changes</B>
+   
+   <DD>This number defines the maximum number of pages that are
+   displayed in the recent changes page. If the number is set to
+   zero, the recent changes icon will not appear.
+   
+   <DT><B>Body Attributes</B>
+   
+   <DD>This string is added to the &lt;body&gt; tag in all of the
+   HTML that is produced.
+   
+   <DT><B>Menu Background</B>
+   
+   <DD>This defines the background colour of the icon bar. Any
+   standard HTML colour will work.
+   
+   <DT><B>Highlight Colour</B>
+   
+   <DD>This colour is used to highlight various bits of text
+   throughout the system. It should contrast with the other colours
+   defined above.
+   
+   <DT><B>Show Cute Icons</B>
+   
+   <DD>This button toggles the appearance of messages from the
+   system. If it is off, then the images of Spot the Spider will not
+   appear.
+   
+   <dt><b>Show Toolbar as Icons</b>
+   
+   <dd>If checked, this option shows the toolbar as icons (more
+   compact, but more confusing). Unchecking it shows the toolbar as
+   text (faster, but takes more screen real estate).</P>
+</DL>
+
+<P>&nbsp;</P>
+
+<P ALIGN=CENTER><A HREF="admin2.html"><IMG SRC="left.gif" WIDTH=39
+HEIGHT=36 X-SAS-UseImageWidth X-SAS-UseImageHeight BORDER=0
+ALIGN=bottom></A></P>
+
+<P ALIGN=CENTER><A HREF="index.html"><IMG SRC="line.gif" ALT="Back"
+WIDTH=312 HEIGHT=79 X-SAS-UseImageWidth X-SAS-UseImageHeight BORDER=0
+ALIGN=bottom></A></P>
+</BODY>
+</HTML>
+
+@

@@ -1,0 +1,161 @@
+*** Current WebWebX users should note:
+*** WebWebX's architecture HAS CHANGED. 
+*** Just copying these files over to your current installation WILL BREAK IT.
+
+New users - you can skip down to THE INSTALL. Old users - here's what you
+need to know about the changes.
+
+WebWebX has been redesigned to allow you to set up other whiteboards more
+easily. The webwebx.cgi script is now just a shell that holds the configuration
+variables that used to live inside webwebx.config, with all the actual code
+living in the same library as PageArchive, Storable, and so on. You should 
+be able to cannibalize your old webwebx.config to set up the new webwebx.cgi.
+Copy the configuration variables from webwebx.config in the old installation
+to webwebx.cgi in the new one.
+
+THE INSTALL
+
+1) First, you'll need to determine 
+   a) the server where you'll be running WebWebX. This should be Apache
+      or IIS; anything that sets up its security model via a .htaccess and
+      htpassword files should work. The Netscape Enterprise server is not
+      supported, partly because no one here runs one, and partly because
+      no one's sent me any patches yet. 
+   b) what ScriptAlias you'll be using to get to the WebWebX installation.
+      Using a ScriptAlias makes it easier to set things up, but it's not
+      required. If you have (or are) a friendly sysadmin, he or she can 
+      set this up. (If you have no ScriptAlias, see NO SCRIPTALIAS? below.)
+   c) the name of the directory you'll be using to set up the password-
+      protected part of the server. The default is "private"; it can be 
+      anything you want.
+   d) The path to the directory that will contain all of the static stuff
+      (like icons and help files). This can be any directory that your
+      HTTP daemon can get to.
+   e) The directory where the whiteboard will store all its data. 
+      This can be anywhere you like on your server, but the HTTP daemon
+      will need to be able to read it and write it.
+   f) The location of your password file. This should NOT be visible via
+      your HTTP daemon (you don't want people downloading the password 
+      file). Both the directory where the password file lives and the 
+      password file itself have to be readable and writable by the 
+      HTTP daemon.
+
+   Now you can set the following variables in webwebx.cgi and proceeed onward.
+
+      $SERVER = "the name of the machine where you're running";
+      $SCRIPT_ALIAS = "the httpd ScriptAlias";
+      $SECURE_DIR = "whatever you picked";
+      $STATIC_PATH = "the partial URL pointing to the directory";
+      $DataDir = "whatever directory you picked";
+      $PasswordFile = "the location of the password file";
+
+   These variables will automatically fix up all the rest of the configuration
+   for you.
+
+PUTTING THE FILES IN PLACE
+This is actually the easy part. (Why isn't it automated? I've been putting
+development time in on making WebWebX nicer, but not the install. Maybe next
+release...)
+
+Pick someplace where you want to store the WebWebX core code (that's the stuff
+in the "lib" directory.) This can be anywhere where you can read and write,
+and where the Web server can read and execute. (A 755 directory outside the
+CGI-capable directory will do fine.) Copy the entire contents of the "lib"
+directory there:
+   (cd lib; tar cvf - *)|(cd /your/library/directory; tar xvf -)
+
+Now copy webwebx.cgi from the "cgi-bin" directory in this distribution to your
+CGI-capable directory.
+
+Copy the contents of the "docs" directory here in the distribution to the 
+directory you set up for the STATIC_PATH variable up above.
+
+If you want to try the insert-mail script, copy that to a handy directory and
+play with it. It's not officially part of WebWebX yet, so be cautious if you
+want to try using it.
+
+NO SCRIPTALIAS?
+
+If you've got just a CGI-capable directory, set the variables as noted above,
+but leave $SCRIPT_ALIAS alone. Instead, insert the string corresponding to 
+hot the Web server whould address that directory into the $CgiUrl variable 
+and the $SecureUrl variable.
+
+Confused? Here's an example. Assume your CGI directory is 
+/usr/people/me/my-cgi, which the Web server gets to as ~me/my-cgi. Then you'd 
+want 
+
+   $CgiUrl = "http://$SERVER/~me/my-cgi";
+   $SecureUrl = "http://$SERVER/~me/my-cgi/$SECURE_DIR";
+
+and WebWebX takes care of the rest.
+
+SETTING UP SECURITY
+
+If you want to run a secured WebWebX, and really, you do want to, then you
+need to do a bit more fiddling about. 
+
+Let's set up the password file. You already know where it lives, since you
+picked the name up above. Remember, this file must live in a directory that
+the Web server can both read and write to.
+
+   1) cd to the directory.
+   2) Check the permissions again. Readable and writable by the Web server;
+      775 if you can set the group permissions so the Web server can write,
+      777 if you can't.
+   3) Find the htpasswd command on your machine. If you can't, skip to
+      step 5. If you don't have shell access on the machine where you're
+      installing WebWebX, skip to step 5.
+   4) Issue the command "htpasswd -c pwfile user", with "pwfile" being the name
+      of the password file you want to create, and "user" the name of the
+      WebWebX administrator (Check out the PICKING NAMES section if you've
+      never used WebWebX!). You'll be prompted for the password twice, to make
+      sure you've got it right. Now skip down to step 6.
+   5) If you can't find the htpasswd command, or you're not allowed to run
+      commands and only have FTP access, do the following.
+      a) Create a file locally and insert this line, starting in column 1:
+         WebWebXAdmin:Ah72K9rnNcqA6
+      b) Get this file to whereever your password file is supposed to be.
+         Copy it there if you've got shell access; ftp it across if not.
+	 The password here is "changeme". Take that seriously and change it
+	 as soon as WebWebX is running.
+   6) Create the .htaccess file. If you can do it directly, go ahead; 
+      otherwise, put this in a local file (again, everything should start
+      in column 1):
+         AuthName "what you want to call this WebWebX"
+	 AuthType Basic
+	 AuthUserFile the full path name of your password file
+
+	 <LIMIT GET POST>
+	 require valid-user
+	 </LIMIT>
+      The AuthName stuff is what comes up in the password prompt box
+      (Enter password for X at servername) in the browser, and should
+      be in quotes. The AuthUserFile is the full pathname to get to the
+      password file, and should NOT be in quotes.
+   7) Chmod the .htaccess file to 644 (read/write by you, read for everyone
+      else).
+You're ready.
+
+STARTING UP WEBWEBX FOR THE FIRST TIME
+
+Enter the URL for the webwebx.cgi script into your handy-dandy browser.
+You'll get the Administrator Setup page the first time. Most of the stuff 
+here is self-explanatory; you'll want to set up the name of the WebWebX and
+the administrator's name and email for sure. Fool around with the rest of it
+later. Click OK and then the Home link.
+
+PICKING NAMES
+Because WebWebX uses intercapitalized words LikeThis to make links, it's a nice
+idea to make all of your user names intercapitalized words. That way, when 
+anyone's name is included in a page, it's an automatic link to a sort of
+personal page inside the WebWebX. Link names have to be a single capital 
+letter followed by one or more lowercase letters, so these are bad:
+  MCThirtyTwoFoot
+  JRRTolkien
+but these are good:
+  BigBadWolf
+  ImOneOfThosePeopleWhoLikeLongNames
+
+See the USING document for a few hints on using WebWebX.
+

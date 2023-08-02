@@ -1,0 +1,58 @@
+head	1.1;
+access;
+symbols
+	2_1_5:1.1
+	2_1_4:1.1
+	2_1_3:1.1
+	2_1_2:1.1
+	2_1_1:1.1
+	2_1:1.1;
+locks; strict;
+comment	@# @;
+
+
+1.1
+date	99.01.21.16.27.56;	author joe;	state Exp;
+branches;
+next	;
+
+
+desc
+@base version as of 2.1
+@
+
+
+1.1
+log
+@Initial revision
+@
+text
+@<!--This file created 1/15/98 8:54 PM by Claris Home Page version 1.0-->
+<HTML>
+<HEAD>
+   <TITLE>WebWeb registration and sign-in 3/3</TITLE>
+   <META NAME=GENERATOR CONTENT="Claris Home Page 1.0">
+   <X-SAS-WINDOW TOP=42 BOTTOM=597 LEFT=4 RIGHT=534>
+</HEAD>
+<BODY BGCOLOR="#FFFFFF">
+
+<H2 ALIGN=CENTER><IMG SRC="bubble.gif" WIDTH=61 HEIGHT=49
+X-SAS-UseImageWidth X-SAS-UseImageHeight ALIGN=middle>WebWeb sign-in</H2>
+
+<H4>How to sign in</H4>
+Go to the WebWeb home page and click on the "Sign In" link in the toolbar (we haven't created an icon for this yet). You'll be asked to enter a user ID and password.<P> 
+
+If you get it right, you'll see the WebWeb main page; all of the links that allow you to edit pages, links, etc., will now be visible. You can author as you please; WebWeb will automatically pick up your user ID when saving information about who last edited or updated a page, and when checking user access information against access lists.
+
+<p>If you get it wrong, your browser will let you try again until you get it right, or you give up.
+ 
+<p ALIGN=CENTER><A HREF="register2.html"><IMG SRC="left.gif" WIDTH=39
+HEIGHT=36 X-SAS-UseImageWidth X-SAS-UseImageHeight BORDER=0
+ALIGN=bottom></A></P>
+
+<P ALIGN=CENTER><A HREF="index.html"><IMG SRC="line.gif" ALT="Back"
+WIDTH=312 HEIGHT=79 X-SAS-UseImageWidth X-SAS-UseImageHeight BORDER=0
+ALIGN=bottom></A></P>
+</BODY>
+</HTML>
+@

@@ -1,0 +1,74 @@
+head	1.1;
+access;
+symbols
+	2_1_5:1.1
+	2_1_4:1.1
+	2_1_3:1.1
+	2_1_2:1.1
+	2_1_1:1.1
+	2_1:1.1;
+locks; strict;
+comment	@# @;
+
+
+1.1
+date	99.01.21.16.27.56;	author joe;	state Exp;
+branches;
+next	;
+
+
+desc
+@base version as of 2.1
+@
+
+
+1.1
+log
+@Initial revision
+@
+text
+@<html>
+<head>
+<title>Properties and security 4/4</title>
+</head>
+
+<body text="#000000" bgcolor="#ffffff">
+
+<center>
+<h2><img src="bubble.gif" align=middle>Properties and security</h2>
+</center>
+
+<h4>More options</h4>
+
+<dl>
+
+<dt>Toggling archiving
+<dd>Page archiving can be toggled on and off. If an archive exists
+	and page archiving is turned off then the page's revision
+	will not increase so that it is kept in sync with the
+	archive. Anything currently in the archive will be retained, but no
+    new archive entries will be made. <p>
+
+<dt>Toggling email notification
+<dd>Email notification for the page can be toggled on and off. This
+	is useful if a heavy discussion is going on, since potentially
+	many emails could be sent out in a short space of time. The WebWeb
+    administrator controls the frequency with which notifications will
+    be sent.<p>
+
+<dt>Changing ownership
+<dd>The page owner can cede ownership by typing a new username into
+	the <em>owner</em> property. There is currently no check for a 
+    valid user name here. Be careful; you will have to get the 
+    WebWeb administrator to fix this if you enter a bad name.
+
+</dl>
+
+<center>
+<a href="props3.html"><img src="left.gif" border=0></a> <p>
+<a href="index.html"><img src="line.gif" alt="Back" border=0></a> <p>
+</center>
+
+</body>
+</html>
+@

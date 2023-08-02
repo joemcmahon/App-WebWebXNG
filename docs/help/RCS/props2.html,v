@@ -1,0 +1,76 @@
+head	1.1;
+access;
+symbols
+	2_1_5:1.1
+	2_1_4:1.1
+	2_1_3:1.1
+	2_1_2:1.1
+	2_1_1:1.1
+	2_1:1.1;
+locks; strict;
+comment	@# @;
+
+
+1.1
+date	99.01.21.16.27.56;	author joe;	state Exp;
+branches;
+next	;
+
+
+desc
+@base version as of 2.1
+@
+
+
+1.1
+log
+@Initial revision
+@
+text
+@<html>
+<head>
+<title>Properties and security 2/4</title>
+</head>
+
+<body text="#000000" bgcolor="#ffffff">
+
+<center>
+<h2><img src="bubble.gif" align=middle>Properties and security</h2>
+</center>
+
+<h4>Access control pages</h4>
+
+Access control pages can be used to define large groups of 
+people that should have similar access rights to different
+WebWeb pages. An access control page can be added to any access
+control list simply by preceding its name with a <em>plus
+sign</em>. <p>
+
+<h4>Structure of an access control page</h4>
+
+An access control page behaves like any other page. However any
+lines beginning with a <em>plus sign</em> are interpreted as
+lists of users which are to be added to the access control
+list which mentions the page. <p>
+
+<ul>
+<li>Access control pages can reference themselves, giving
+	a self-maintainable list of users.
+<li>A page can reference itself in its access control lists.
+	This does not produce a recursive search, and is perfectly
+	safe.
+</ul> <p>
+
+Any access control pages can be reached quickly by looking at
+the page information. Any access control pages mentioned in
+the access control lists will be hyperlinked automatically. <p>
+
+<center>
+<a href="props.html"><img src="left.gif" border=0></a>
+<a href="props3.html"><img src="right.gif" border=0></a> <p>
+<a href="index.html"><img src="line.gif" alt="Back" border=0></a> <p>
+</center>
+
+</body>
+</html>
+@
