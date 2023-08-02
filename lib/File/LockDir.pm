@@ -1,8 +1,40 @@
+=head1 NAME
+
+File::LockDir - file-level locking
+
+=head1 SYNOPSIS
+
+    # at startup
+    use File::LockDir;
+    File::LockDir::init(logger => \&logging_function,
+                        fatal  => \&fatal_function);
+    nflock(
+
+=head1 DESCRIPTION
+
+C<File::LockDir> maintains a lockfile for each file referenced in the wiki's
+page storage. The page storage directory is assumed to be writeable by the
+wiki script.
+
+This module provides very basic filename-level locks. It was originally designed
+to be used on a single machine being time-shared between multiple developers, but
+should still work in a standard web environment. It may not be fast enough in an
+enviroment with many people editing the wiki at once.
+
+The original version was written for Perl 4 and expected the wiki files to reside
+on NFS (hence the need for the `hostname` parameter). It was not updated to more contemporary
+standards; this module would be better if it instantiated an object and stored the
+C<logger> and C<fatal> functions there, for instance, and might better handle things
+by storing the locking info in a DB table instead. As it is, there can be only
+one C<File::LockDir> configuration per wiki instance.
+
+Locking is done by creating a lock directory instead of opening, writing,
+and closing a file because the wiki was on a shared NFS volume; creating a directory
+was (is?) atomic on NFS.
+
+=cut
+
 package File::LockDir;
-# module to provide very basic filename-level
-# locks.  No fancy systems calls.  In theory,
-# directory info is sync'd over NFS.  Not
-# stress tested.
 
 use strict;
 
@@ -11,18 +43,27 @@ use vars qw(@ISA @EXPORT);
 @ISA      = qw(Exporter);
 @EXPORT   = qw(nflock nunflock nlock_state);
 
+# Awkward global configuration. This should be moved to a new().
+use vars qw($Debug $Check $Tries);
 
-use vars qw($Debug $Check);
-$Debug  ||= 1;  # may be predefined
-$Check  ||= 5;  # may be predefined
+# May be 1 to add debugging or 0 to skip it.
+$Debug  ||= 1;
+
+# Number of seconds to sleep between lock attempts.
+$Check  ||= 5;
+
+# Number of tries before we give up on getting a lock.
+$Tries ||= 10;
+
+
 
 use Cwd;
 use Fcntl;
 use Sys::Hostname;
 use File::Basename;
-#use File::stat;
 use Carp;
 
+# This should be stored in an object, not in the module's namespace.
 my %Locked_Files = ();
 
 sub init {
@@ -41,7 +82,50 @@ sub init {
     *File::LockDir::fatal = $params{Fatal}  || sub{ croak @_ };
 }
 
-# usage: nflock(FILE; NAPTILL; LOCKER)
+=head2 nflock($path, $delay, $locking_user, $hostname)
+
+nflock actually locks a file if possible by creating a lockfile
+in the same directory and storing the locking user and host into it.
+
+=over
+
+=item $path
+
+The filepath of the file being locked. This file must reside in a
+directory writeable by the caller.
+
+=item $delay
+
+We delay this long before retrying the lock. If set to zero, we
+keep retrying forever. (XXX: this is probably the wrong choice now,
+but was useful when all of the users of the wiki knew each other's
+phone numbers and could call to ask the other person to release the
+lock.)
+
+
+=item $locking_user
+
+The wiki username of the user locking the file.
+
+=item $hostname
+
+The hostname of the host locking the file.
+
+=back
+
+This function I<only> locks the file if possible. It does not verify
+that the requestor owns the lock if the file is already locked.
+
+Locking is done by creating a "lockdir" and writing a status file into it.
+The lockdir was used because creating it is an atomic transaction on NFS.
+
+Returns 1 if the file is locked.
+
+Dies if the file cannot be locked.
+
+=cut
+
+# usage: nflock(FILE; NAPTILL; LOCKER; LOCKHOST)
 sub nflock($;$;$;$) {
     my $pathname = shift;
     my $naptime  = shift || 0;
@@ -63,28 +147,43 @@ sub nflock($;$;$;$) {
         fatal("can't write to directory of $pathname");
     }
 
+# XXX: the number of retries should be settable too.
+#      #nomoremagicnumbers
     my $lockee;
+
+    # Keep trying to get the lock until we give up.
     while (1) {
         last if mkdir($lockname, 0777);
-        fatal("can't get $lockname: $!") if $missed++ > 10
+        # If we've run out of tries, die. (Caller is expecting this.)
+        fatal("can't get $lockname: $!") if $missed++ > $Tries
                         && !-d $lockname;
+      # If debugging, show us who has the lock now.
+    DEBUG:
         if ($Debug) {
-            open(OWNER, "< $whosegot") || last; # exit "if"!
+            # If we can't open the "who owns this" file, don't try the
+            # rest of this block.
+            open(OWNER, "<", $whosegot) || last DEBUG;
             $lockee = <OWNER>;
-	    close OWNER;
+	          close OWNER;
             chomp($lockee);
-            note(sprintf "%s $0\[$$]: lock on %s held by %s\n",
-                scalar(localtime()), $pathname, $lockee);
+            note(sprintf("%s $0\[$$]: lock on %s held by %s\n",
+                scalar(localtime()), $pathname, $lockee));
         }
+
+        # Wait a bit to see if we can get it. If we've used up our
+        # time, fetch the current lock info and return it.
         sleep $Check;
         if ($naptime && time > $start+$naptime) {
             open(OWNER, "< $whosegot") || last; # exit "if"!
             $lockee = <OWNER>;
-	    close OWNER;
+	          close OWNER;
             chomp($lockee);
             return (undef, $lockee);
         }
     }
+
+    # We were able to create the lock directory, so we have possession
+    # of the lock. Write the locker info out and return success.
     sysopen(OWNER, $whosegot, O_WRONLY|O_CREAT|O_EXCL)
                             or fatal("can't create $whosegot: $!");
     my $locktime = scalar(localtime());
@@ -96,7 +195,19 @@ sub nflock($;$;$;$) {
     return (1, undef);
 }
 
-# free the locked file
+=head2 nfunlock($pathnane)
+
+Unlocks the supplied path by removing the lock data file and then
+removing the lock directory (again, an atomic operation on NFS).
+
+=over
+
+=item $pathname - full pathname of the file to be unlocked.
+
+=back
+
+=cut
+
 sub nunflock($) {
     my $pathname = shift;
     my $lockname = name2lock($pathname);
@@ -106,6 +217,12 @@ sub nunflock($) {
     delete $Locked_Files{$pathname};
     return rmdir($lockname);
 }
+
+=head2 nlock_state($pathname)
+
+Checks lock state for the given path.
+
+=cut
 
 # check the state of the lock, bu don't try to get it
 sub nlock_state($) {
@@ -122,7 +239,6 @@ sub nlock_state($) {
     chomp($lockee);
     return (undef, $lockee);
 }
-     
 
 # helper function
 sub name2lock($) {
