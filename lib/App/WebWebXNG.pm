@@ -107,7 +107,7 @@ use vars qw( @AdminInfoFields );
 #------------------------------------------------------------------------------
 use Carp;
 use Storable;
-use PageArchive;
+use PageArchive::RCS;
 use Sys::Hostname;
 use PasswordManager;
 
@@ -3130,7 +3130,7 @@ $SearchForm = "<form>\n"
 $| = 1;
 #print "Content-type: text/plain\n\r\n\r";
 
-$PageArchive = new PageArchive($DataDir,
+$PageArchive = PageArchive::RCS->new($DataDir,
                                Logger=>\&main::note,
                                Fatal=>\&main::FatalError);
 
