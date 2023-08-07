@@ -55,4 +55,4 @@ severity = 5
 
 [Modules::ProhibitEvilModules]
 severity = 5
-modules_file = ~/.etc/cpan/banned
+modules_file = .etc/cpan/banned
