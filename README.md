@@ -1,3 +1,9 @@
+# NOTE: WebWebXNG is still a work in progress!
+
+I'm converting the old barely-perl5 version to current Perl coding standards,
+and replacing the dependency on the Apache webserver to Mojolicious, to make
+the process of getting it installed and running a lot less difficult.
+
 # WebWebXNG
 
 WebWebXNG is a Perl wiki: a text-based Web collaboration server.
