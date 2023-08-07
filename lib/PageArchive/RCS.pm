@@ -66,7 +66,7 @@ sub new {
             foreach (@path) {
                 $accumulated_path .= "/$_";
                 next if -e $accumulated_path and -d _;
-                unless (mkdir $acumulated_path,0700) {
+                unless (mkdir $accumulated_path,0700) {
                     $self->fatal->("Can't create $accumulated_path: $!");
                 }
             }
