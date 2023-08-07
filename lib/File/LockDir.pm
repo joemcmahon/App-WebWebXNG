@@ -1,3 +1,8 @@
+use strict;
+use warnings;
+
+package File::LockDir;
+
 =head1 NAME
 
 File::LockDir - file-level locking
@@ -33,10 +38,6 @@ and closing a file because the wiki was on a shared NFS volume; creating a direc
 was (is?) atomic on NFS.
 
 =cut
-
-package File::LockDir;
-
-use strict;
 
 use Exporter;
 use vars qw(@ISA @EXPORT);
