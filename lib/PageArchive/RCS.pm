@@ -205,7 +205,8 @@ sub get {
     }
 
     # This shouldn't happen, unless someone's been fiddling with the database.
-    unless(open(my $handle, $self->{DirName} . "/" . $name . "," . $version)) {
+    my $handle;
+    unless(open($handle, "<", $self->{DirName} . "/" . $name . "," . $version)) {
         $self->setError("Unreadable file $self->{DirName}/$name,$version: $!");
         return;
     }
