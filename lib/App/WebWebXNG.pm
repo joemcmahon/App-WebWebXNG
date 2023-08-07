@@ -21,6 +21,24 @@ package App::WebWebXNG;
 use vars qw(
       $IconUrl
       $Max
+      $HelpUrl
+      $HighlightColor
+      $CgiUrl
+      $MailProgram
+      $DebugAdminValues
+      $PasswordFile
+      $DataDir
+      $SecureUrl
+      $DisplayComments
+	    $DisplayContentOnly
+      );
+
+# These are very CGI specific and will probably be able to be deleted.
+use vars qw(
+	    $SERVER
+	    $SCRIPT_ALIAS
+	    $SECURE_DIR
+	    $STATIC_PATH
       );
 
 # Old webwebx.pl globals.
@@ -123,7 +141,60 @@ $SIG{TERM} = sub {
     &FatalError("Premature termination, see error log");
 };
 
+sub setup_kludge {
+    # Change this to the nameof the server where you're running WebWebX.
+    $SERVER       = "prtims.stx.com";
+
+    # Change this to the ScriptAlias you're using in your httpd.conf.
+    $SCRIPT_ALIAS = "whiteboard";
+
+    # Change this to the secure directory you'll be using (that's the one
+    # where you put the .htaccess file).
+    $SECURE_DIR   = "private";
+
+    # Change this to the directory that contains the icons and help files
+    # (remember this has to be accessible to your httpd!).
+    $STATIC_PATH  = "~joe/webwebx";
+
+    ### The directory which stores all of the databases.
+    $DataDir = "/home/joe/whiteboard";
+
+    ### The URL of the CGI *directory* in which this script is stored.
+    ### This is NOT the full URL!
+    $CgiUrl = "http://$SERVER/$SCRIPT_ALIAS";
+
+    ### The URL of the secured CGI *directory* in which a link to this
+    ### script is stored. This is NOT the full URL!
+    $SecureUrl = "http://$SERVER/$SCRIPT_ALIAS/$SECURE_DIR";
+
+    ### The URL of the icon directory.
+    $IconUrl = "http://$SERVER/$STATIC_PATH/icons";
+
+    ### The URL of the help directory.
+    $HelpUrl = "http://$SERVER/$STATIC_PATH/help";
+
+    ### The name of the password file to be used. The following
+    ### must be true:
+    ###   - the file must be readable and writable by the web server users or group.
+    ###   - the directory containing the file must also be readable and writable
+    ###     by the web server user or group.
+    ###   - this must be file file that your .htaccess file references.
+    ### Do NOT make this file 777!
+    # XXX: This is going to be replaced by a completely different password management scheme.
+    #      Mojolicious::Plugin:: Authentication should suffice and stays with our low-dependencies policy.
+    #      Leaving this for now until we start replacing the password management.
+    $PasswordFile = "/home/joe/whiteboard/.htpasswd";
+
+    ### Location of your system's "sendmail" program. If you do not have
+    ### send mail or you want to stop all email notification, leave this
+    ### variable blank.
+    # XXX: Mojolicious::Plugin::Mail can do this. We should consider whether to make this a
+    #      generalized notification interface and then let people plug in what they want.
+    $MailProgram = "/usr/lib/sendmail";
+}
+
 sub main {
+    setup_kludge();
 # ----------------
 # HTML Subroutines
 # ----------------
@@ -954,7 +1025,7 @@ sub GetCgiInput {
 	my @output = "Cgi values:";
 	foreach (sort keys %Cgi) {
 	    my $a = $Cgi{$_};
-	    $a =~ tr/\n/\\n/;
+	    $a =~ s/\n/\\n/g;
 	    push @output, $_ . " = " . $a;
 	}
 	note(@output);
