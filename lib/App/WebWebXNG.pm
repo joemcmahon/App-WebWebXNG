@@ -3211,7 +3211,7 @@ EOF
   $Debug || ( $Debug = 1 );
 
   # Get the name of this script (since it may be a symbolic link).
-  my @path = split( '/', "$ENV{SCRIPT_NAME}" ) if defined( $ENV{SCRIPT_NAME} );
+  my @path = split( '/', "$ENV{SCRIPT_NAME}" );
   $ScriptName = pop(@path) || 'WebWebX';
 
   # Get the name of the current user.
