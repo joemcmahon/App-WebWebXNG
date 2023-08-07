@@ -138,7 +138,7 @@ use Sys::Hostname;
 use PasswordManager;
 
 $SIG{TERM} = sub {
-    &FatalError("Premature termination, see error log");
+    FatalError("Premature termination, see error log");
 };
 
 sub setup_kludge {
@@ -207,7 +207,7 @@ sub ReDo {
     note("ReDoing");
     my $sub = shift;
     my $reset = shift;
-    &ReleaseLock;
+    ReleaseLock();
     push @GlobalStatus, @_;
     %Cgi = %$reset;
     $ENV{REQUEST_METHOD} = "GET";
@@ -252,7 +252,7 @@ Pragma: no-cache
 <td bgcolor=\"$MenuBackground\">
 
 EOF
-        &PrintIcons;
+        PrintIcons();
 
 	print "</td><td width=\"90\%\">\n\n";
 
@@ -315,7 +315,7 @@ sub PrintIcons {
     else {
         print "<i>Not signed in (anonymous)</i><p>";
     }
-    &IconLink("$ScriptUrl","spot.gif","Server Home");
+    IconLink("$ScriptUrl","spot.gif","Server Home");
     print "<hr>\n";
 
     # If we were viewing an editable page, go back there after signin.
@@ -323,7 +323,7 @@ sub PrintIcons {
     my $what_to_do = ($title ? "ViewPage=$title"
 		             : $RawInput);
 
-    &IconLink("$SigninUrl?$what_to_do","signin.gif","Sign In")
+    IconLink("$SigninUrl?$what_to_do","signin.gif","Sign In")
       if $CurrentUser eq "anonymous";
 
     # note that after this, if the page doesn't exist $Cgi{max} will be undef.
@@ -344,7 +344,7 @@ sub PrintIcons {
     if ($Cgi{Back}) {
 	my ($p,$r) = split(',', $Cgi{Back} );
 	$p .= "&ar=$r" if defined $r && $r < $Cgi{max};
-	&IconLink("$ScriptUrl?ViewPage=$p$Back",
+	IconLink("$ScriptUrl?ViewPage=$p$Back",
 		  "left.gif","Back To Previous Page");
 	print "<hr>\n";
     }
@@ -359,25 +359,25 @@ sub PrintIcons {
 	    $next = $rev + 1;
 
 	    if ($ReadAccess) {
-		&IconLink("$ScriptUrl?ViewPage=$title$Back",
+		IconLink("$ScriptUrl?ViewPage=$title$Back",
                           "viewtop.gif","Most Recent");
 		if ($prev > 0) {
-		    &IconLink("$ScriptUrl?ViewPage=$title&ar=$prev$Max$Back",
+		    IconLink("$ScriptUrl?ViewPage=$title&ar=$prev$Max$Back",
 			      "b_archive.gif","Older");
 		}
 		if ($next < $max) {
-		    &IconLink("$ScriptUrl?ViewPage=$title&ar=$next$Max$Back",
+		    IconLink("$ScriptUrl?ViewPage=$title&ar=$next$Max$Back",
 			      "f_archive.gif","Newer");
 		}
 	    }
 
 	    if ($EditAccess) {
-		&IconLink("$ScriptUrl?RestorePage=$title&ar=$Cgi{ar}$Max$Back",
+		IconLink("$ScriptUrl?RestorePage=$title&ar=$Cgi{ar}$Max$Back",
 			  "restore.gif","Restore");
 	    }
 
 	    if ($ModifyAccess) {
-		&IconLink("$ScriptUrl?PurgePage=$title$Back",
+		IconLink("$ScriptUrl?PurgePage=$title$Back",
 			  "purge.gif","Purge");
 	    }
 
@@ -397,36 +397,36 @@ sub PrintIcons {
 	    $max_v = $PageArchive->max_version($title)
 	      if defined $PageArchive;
 	    if ($ReadAccess) {
-		&IconLink("$ScriptUrl?ViewPage=$title","view.gif","View");
-		&IconLink("$ScriptUrl?SearchRefs=$title&Back=$title$Back",
+		IconLink("$ScriptUrl?ViewPage=$title","view.gif","View");
+		IconLink("$ScriptUrl?SearchRefs=$title&Back=$title$Back",
 			  "viewrefs.gif","View Refs");
 
 		if ($page{Archive} && $page{Revision} > 1) {
 		    my $max = $page{Revision};
 		    my $prev = $max - 1;
-		    &IconLink("$ScriptUrl?ViewPage=$title&ar=$prev" .
+		    IconLink("$ScriptUrl?ViewPage=$title&ar=$prev" .
 			      "&max=$max$Back",
 			      "archive.gif","Archive ($max_v versions)");
 		}
 
-		&IconLink("$ScriptUrl?PageInfo=$title&Back",
+		IconLink("$ScriptUrl?PageInfo=$title&Back",
 			  "info.gif","Information");
-		&IconLink("$ScriptUrl?MailNotify=$title&Back",
+		IconLink("$ScriptUrl?MailNotify=$title&Back",
 			  "mail.gif","Set Mail Notification")
                     unless $CurrentUser eq "anonymous";
 		print "<hr>\n";
 	    }
 
 	    if ($EditAccess) {
-		&IconLink("$ScriptUrl?EditPage=$title",
+		IconLink("$ScriptUrl?EditPage=$title",
 			  "edit.gif","Edit");
-		&IconLink("$ScriptUrl?EditLinks=$title$Back",
+		IconLink("$ScriptUrl?EditLinks=$title$Back",
 			  "links.gif","Edit Links")
 		  unless ($CurrentUser eq "anonymous" and $AnonAppendOnly);
 		if (defined $PageArchive) {
 		    my ($unlocked, $locker) =
 		      $PageArchive->is_unlocked($title);
-		    &IconLink("$ScriptUrl?UnlockFile=true$Back&".
+		    IconLink("$ScriptUrl?UnlockFile=true$Back&".
 			      "unlock_target=$title",
 			      "unlock.gif","Break Edit Lock")
 		      if !$OnlyAdminCanUnlock && !$unlocked;
@@ -435,11 +435,11 @@ sub PrintIcons {
 	    }
 
 	    if ($ModifyAccess) {
-		&IconLink("$ScriptUrl?PageProps=$title$Back",
+		IconLink("$ScriptUrl?PageProps=$title$Back",
 		  "props.gif","Properties");
-		&IconLink("$ScriptUrl?RenamePage=$title$Back",
+		IconLink("$ScriptUrl?RenamePage=$title$Back",
 			  "rename.gif","Rename");
-		&IconLink("$ScriptUrl?DeletePage=$title$Back",
+		IconLink("$ScriptUrl?DeletePage=$title$Back",
 			  "delete.gif","Delete");
 		print "<hr>\n";
 	    }
@@ -450,21 +450,21 @@ sub PrintIcons {
     note ("ScriptUrl is $ScriptUrl");
     note ("title is $title");
     if ($MaxRecentChanges > 0) {
-	&IconLink("$ScriptUrl?RecentChanges=true$Back",
+	IconLink("$ScriptUrl?RecentChanges=true$Back",
 		  "changes.gif","Recent Changes");
     }
 
     if ($SearchPage) {
-	&IconLink("$ScriptUrl?ViewPage=$SearchPage$Back",
+	IconLink("$ScriptUrl?ViewPage=$SearchPage$Back",
 		  "search.gif","Search All Pages");
     }
 
-    &IconLink("$ScriptUrl?EditMail=true$Back",
+    IconLink("$ScriptUrl?EditMail=true$Back",
 	      "editmail.gif","Set My Email Address")
       unless $CurrentUser eq "anonymous";
 
     print "<hr>\n";
-    &IconLink("$HelpUrl","help.gif","Help");
+    IconLink("$HelpUrl","help.gif","Help");
     print "<hr>\n";
 
     my $is_admin = $AdminUser && ($CurrentUser eq $AdminUser);
@@ -479,21 +479,21 @@ sub PrintIcons {
 			  or $is_admin);
 	note("$CurrentUser can" . ($can_user ? "" : "not") . " manage users");
     }
-    &IconLink("$ScriptUrl?SetAdminData=true$Back",
+    IconLink("$ScriptUrl?SetAdminData=true$Back",
               "admin.gif","Change Setup")             if $can_manage;
-    &IconLink("$ScriptUrl?ManageUsers=true$Back",
+    IconLink("$ScriptUrl?ManageUsers=true$Back",
               "admin.gif","Manage Users")             if $can_user;
-    &IconLink("$ScriptUrl?UserPWChange=true$Back",
+    IconLink("$ScriptUrl?UserPWChange=true$Back",
               "admin.gif","Change my password")       if !$can_user and
 		                                 ($CurrentUser ne "anonymous");
-    &IconLink("$ScriptUrl?UnlockFile=true$Back",
+    IconLink("$ScriptUrl?UnlockFile=true$Back",
               "unlock.gif","Unlock Arbitrary Entry")  if $can_manage;
-    &IconLink("$ScriptUrl?GlobalPurge=true$Back",
+    IconLink("$ScriptUrl?GlobalPurge=true$Back",
               "admin.gif","Global Purge of Archives") if $can_manage;
 
     if ($Cgi{Back}) {
 	print "<hr>\n";
-	&IconLink("$ScriptUrl?ViewPage=$Cgi{Back}",
+	IconLink("$ScriptUrl?ViewPage=$Cgi{Back}",
 		  "left.gif","Back To Previous Page");
     }
     print "\n<center>\n";
@@ -530,7 +530,7 @@ sub IconLink {
 sub FatalError {
     my ($message) = @_;
 
-    &PrintHtmlHeader("Error");
+    PrintHtmlHeader("Error");
 
     $CuteIcons
       ? print "<img src=\"$IconUrl/oops.gif\" alt=\"Oops\"> <p>\n\n"
@@ -544,11 +544,11 @@ sub FatalError {
 	print "with details of the error. <p>\n";
     }
 
-    &PrintHtmlFooter;
+    PrintHtmlFooter;
 
     # Check if we have locked the database.
     if ($ENV{REQUEST_METHOD} eq "POST") {
-	&ReleaseLock;
+	ReleaseLock();
         note("Database unlocked");
     }
     croak($message);
@@ -610,7 +610,7 @@ sub ConvertAndPrintBody {
         # Check if the line is blank.
         if (/^\s*$/) {
 	    # If so, finish off any lists and continue with the next line.
-	    &EmitCode("", 0);
+	    EmitCode("", 0);
             print "<p>\n";
             next;
         }
@@ -622,15 +622,15 @@ sub ConvertAndPrintBody {
         }
 
         # Deal with any lists, ordered lists or descriptions.
-        s/^(#+) (.+) - /<dt>$2<dd>/ && &EmitCode("dl", length $1);
-        s/^(#+) \*/<li>/ && &EmitCode("ul", length $1);
-        s/^(#+) \d+\.?/<li>/ && &EmitCode("ol", length $1);
+        s/^(#+) (.+) - /<dt>$2<dd>/ && EmitCode("dl", length $1);
+        s/^(#+) \*/<li>/ && EmitCode("ul", length $1);
+        s/^(#+) \d+\.?/<li>/ && EmitCode("ol", length $1);
 
-        s/^(\t+)(.+) - /<dt>$2<dd>/ && &EmitCode("dl", length $1);
-        s/^(\t+)\*/<li>/ && &EmitCode("ul", length $1);
-        s/^(\t+)\d+\.?/<li>/ && &EmitCode("ol", length $1);
+        s/^(\t+)(.+) - /<dt>$2<dd>/ && EmitCode("dl", length $1);
+        s/^(\t+)\*/<li>/ && EmitCode("ul", length $1);
+        s/^(\t+)\d+\.?/<li>/ && EmitCode("ol", length $1);
 
-        s/^\s// && &EmitCode("pre", 1);
+        s/^\s// && EmitCode("pre", 1);
 
         # Deal with any emphasized text or horizontal rules.
 
@@ -642,7 +642,7 @@ sub ConvertAndPrintBody {
 
         pos = 0; my $lastpos = 0; my $out = "";
         while(my($start,$link) = /\G(.*?)($TickedOrNot)/g){
-           my $change = &AsInternalLink($link);
+           my $change = AsInternalLink($link);
            $out .= "$start$change";
            pos = $lastpos + length($link)+length($start);
            $lastpos = pos;
@@ -652,11 +652,11 @@ sub ConvertAndPrintBody {
         # Link any external references.
 
         s/\[Search\]/$SearchForm/; # Special case for search form.
-        s/\[($ReferencePattern)\]/&AsExternalLink($1)/geo;
+        s/\[($ReferencePattern)\]/AsExternalLink($1)/geo;
 
         # Replace any placeholders for literal URLs.
 
-        s/$FieldSeparator(\d+)$FieldSeparator/&AsLiteralUrl($1)/geo;
+        s/$FieldSeparator(\d+)$FieldSeparator/AsLiteralUrl($1)/geo;
 
         # Print the resulting HTML.
 
@@ -665,7 +665,7 @@ sub ConvertAndPrintBody {
 
     # Make sure any lists are finished off.
 
-    &EmitCode("", 0);
+    EmitCode("", 0);
 }
 
 # AsInternalLink (title)
@@ -1053,10 +1053,10 @@ sub RequestLock {
     while (mkdir($LockDir, 0555) == 0) {
 	# Check if the directory exists, or print an error message if the
 	# directory could not be created for any other reason.
-	$! == 17 || &FatalError("Can't create lock $LockDir: $!");
+	$! == 17 || FatalError("Can't create lock $LockDir: $!");
 
 	# Check that we haven't timed out.
-	$count++ < 30 || &FatalError("Timed out waiting for lock $LockDir");
+	$count++ < 30 || FatalError("Timed out waiting for lock $LockDir");
 
 	# Wait one second before trying again.
 	sleep(1);
@@ -1178,7 +1178,7 @@ sub GetPage {
 
     if (%page) {
         if ($Cgi{ar}) {
-    	    $Cgi{ar} && &AccessArchive;
+    	    $Cgi{ar} && AccessArchive();
         }
     	return DefaultPage(%page);
     }
@@ -1226,7 +1226,7 @@ sub SaveCurrentPage {
     $PageArchive->put($title,\%page,$page{Revision});
     note("Saving page as $title,$page{Revision}");
     $PageArchive->getError()
-	and &FatalError("Could not put page: $PageArchive->getError()");
+	and FatalError("Could not put page: $PageArchive->getError()");
 }
 
 # UpdateContents
@@ -1283,7 +1283,7 @@ sub UpdateLinks {
     note("linkes updated");
 
     # Save the local copy of the page.
-    &SaveCurrentPage;
+    SaveCurrentPage;
 }
 
 # UpdateProperties
@@ -1324,20 +1324,20 @@ sub HandleSearch {
     if ($Cgi{Back}) {
 	$title = $Cgi{Back};
 	%page = RetrievePage($title);
-	&GetAccessVars;
+	GetAccessVars();
     }
 
     # Get the pattern and escape any regexp characters.
     my $pattern = $Cgi{SearchRefs};
     $pattern =~ s/[+?.*[\]{}|\\]/\\$&/g;
 
-    &PrintHtmlHeader("Search Results");
+    PrintHtmlHeader("Search Results");
     print "<h2>Search Results</h2>\n\n";
 
     my ($total, $matched, %page);
     note("Building iterator");
     my @keys = $PageArchive->iterator();
-    &FatalError("Could not build iterator.") unless int @keys;
+    FatalError("Could not build iterator.") unless int @keys;
 
     note("Starting search");
     my $key;
@@ -1362,7 +1362,7 @@ sub HandleSearch {
     print $matched == 1 ? "1 page" : "$matched pages";
     print " found out of $total.</small>\n";
 
-    &PrintHtmlFooter;
+    PrintHtmlFooter;
 }
 
 # HandleView
@@ -1382,15 +1382,15 @@ sub HandleView {
     keys %page or FatalError("Page was not returned");
 
     # Check the user is allowed to access the page.
-    &GetAccessVars;
-    $ReadAccess || &FatalError("You do not have permission to view this page");
+    GetAccessVars();
+    $ReadAccess || FatalError("You do not have permission to view this page");
 
     # Print the page contents.
 
     my $prettyTitle = DetermineTitle($title,\%page);
-    &PrintHtmlHeader($prettyTitle);
-    &ConvertAndPrintBody($prettyTitle);
-    &PrintHtmlFooter;
+    PrintHtmlHeader($prettyTitle);
+    ConvertAndPrintBody($prettyTitle);
+    PrintHtmlFooter();
 }
 
 # HandleDiffs
@@ -1400,24 +1400,24 @@ sub HandleView {
 sub HandleDiffs {
     # Get the title and fetch the page from the database.
     $title = $Cgi{ShowDiffs};
-    %page = &RetrievePage($title);
+    %page = RetrievePage($title);
 
     # Check the user is allowed to access the page.
-    &GetAccessVars;
-    $ReadAccess || &FatalError("You do not have permission to view this page");
+    GetAccessVars();
+    $ReadAccess || FatalError("You do not have permission to view this page");
 
     # Print the page contents.
 
     my $prettyTitle = DetermineTitle($title,\%page);
-    &PrintHtmlHeader($prettyTitle);
+    PrintHtmlHeader($prettyTitle);
 
-    &HighlightDiffs;
-    &ConvertAndPrintBody($prettyTitle);
+    HighlightDiffs();
+    ConvertAndPrintBody($prettyTitle);
 
     # print "\n<p><hr>\n";
     # print "<small>Amendments have been highlighted.</small>\n";
 
-    &PrintHtmlFooter;
+    PrintHtmlFooter();
 }
 
 # HighlightDiffs
@@ -1428,7 +1428,7 @@ sub HandleDiffs {
 sub HighlightDiffs {
     # Get the first archived page.
     #$Cgi{ar} = $page{Revision} - 1;
-    my %archive = &RetrievePage($title,$page{Revision}-1);
+    my %archive = RetrievePage($title,$page{Revision}-1);
     #$PageArchive->delete($Cgi{ar});
 
     # Chop the contents into bits.
@@ -1492,17 +1492,17 @@ sub HandleLinks {
 
     # Get the title and fetch the page from the database.
     $title = $Cgi{EditLinks};
-    %page = &RetrievePage($title);
+    %page = RetrievePage($title);
 
     # Check the user is allowed to access the page.
-    &GetAccessVars;
+    GetAccessVars();
     $EditAccess
-	|| &FatalError("You do not have permission to edit the links on this page");
+	|| FatalError("You do not have permission to edit the links on this page");
 
     # Print the page contents (the links will be made editable automatically).
     my $prettyTitle = DetermineTitle($title,\%page);
-    &PrintHtmlHeader("Edit links in $prettyTitle");
-    &ConvertAndPrintBody($prettyTitle);
+    PrintHtmlHeader("Edit links in $prettyTitle");
+    ConvertAndPrintBody($prettyTitle);
 
     print "<p><hr>\n";
     print "<small>\n";
@@ -1510,7 +1510,7 @@ sub HandleLinks {
     $page{EditDate} && $page{EditUser} &&
 	print "Last edited $page{EditDate} by $page{EditUser}.";
     print "</small>\n";
-    &PrintHtmlFooter;
+    PrintHtmlFooter();
 }
 
 # HandleEditLink
@@ -1523,21 +1523,21 @@ sub HandleEditLink {
     $link = $Cgi{EditLink};
 
     # Check the user is allowed to access the page.
-    &GetAccessVars;
-    $EditAccess || &FatalError("You do not have permission to edit this page");
+    GetAccessVars();
+    $EditAccess || FatalError("You do not have permission to edit this page");
 
     # Get the page from the database, and restore the link hash.
-    %page = &RetrievePage($title);
+    %page = RetrievePage($title);
     %links = {} if $page{Links} eq "-";
     %links = split($OtherSeparator, $page{Links});
 
     if ($ENV{REQUEST_METHOD} eq "GET") {
-	&PrintHtmlHeader("Edit [$link] in $title");
-	&PrintEditLinkPage;
-	&PrintHtmlFooter;
+	PrintHtmlHeader("Edit [$link] in $title");
+	PrintEditLinkPage();
+	PrintHtmlFooter();
     }
     else {
-	&UpdateLinks;
+	UpdateLinks;
         ReShow($title, "Successfully updated [$link].");
     }
 }
@@ -1556,11 +1556,11 @@ sub HandleEdit {
     # Get the title and fetch the page from the database.
     $title = $Cgi{EditPage};
     note("Editing $title");
-    %page = &RetrievePage($title);
+    %page = RetrievePage($title);
 
     # Check the user is allowed to access the page.
-    &GetAccessVars;
-    $EditAccess || &FatalError("You do not have permission to edit this page");
+    GetAccessVars();
+    $EditAccess || FatalError("You do not have permission to edit this page");
     note("access permitted");
 
     if ($ENV{REQUEST_METHOD} eq "GET") {
@@ -1578,24 +1578,24 @@ sub HandleEdit {
                 note("not locked, locking");
                 my ($available,$locked_by) =
 		  $PageArchive->lock($title,$CurrentUser,$CurrentHost);
-		&FatalError("This page is now being edited.<p>" .
+		FatalError("This page is now being edited.<p>" .
                             "It is in use by $locked_by")
 		  unless $available;
             }
             elsif ($locker !~ /^$CurrentUser/) {
-                &FatalError("This page is still being edited.<p>" .
+                FatalError("This page is still being edited.<p>" .
                             "It is in use by $locker$optional")
             }
             # Allow the user to edit it if he is the locker.
         }
-	&PrintHtmlHeader("Edit $title");
+	PrintHtmlHeader("Edit $title");
         if ($CurrentUser eq "anonymous" and $AnonAppendOnly) {
-            &PrintAppendPage;
+            PrintAppendPage;
         }
         else {
-	    &PrintEditPage;
+	    PrintEditPage();
         }
-	&PrintHtmlFooter;
+	PrintHtmlFooter();
 
     }
     else {
@@ -1608,15 +1608,15 @@ sub HandleEdit {
         }
 
 	# Check if we should send email notification.
-	&InheritProperties;
-	&ArchiveCurrentPage($title,\%page);
-	&UpdateContents;
-	$page{MailNotify} and &SendNotification;
+	InheritProperties();
+	ArchiveCurrentPage($title,\%page);
+	UpdateContents();
+	$page{MailNotify} and SendNotification();
         if ($AggressiveLocking) {
 	    $PageArchive->unlock($title) or
 	      FatalError("Unable to release edit lock for $title");
 	}
-        &ReleaseLock;
+        ReleaseLock();
         note("Page $title now unlocked");
         ReShow($title, "$title was updated successfully.");
     }
@@ -1639,7 +1639,7 @@ sub SendNotification {
     # locked so the save operation is safe).
     $page{LastMailed} = time;
     note("Saving new timestamp");
-    &SaveCurrentPage;
+    SaveCurrentPage();
 
     # Make sure the mail program has been defined.
     $MailProgram || return;
@@ -1698,15 +1698,15 @@ EOF
 sub HandleRestore {
     # Get the page from the database so that we can check access.
     $title = $Cgi{RestorePage};
-    %page = &RetrievePage($title);
+    %page = RetrievePage($title);
 
     # Check the user is allowed to access the page.
-    &GetAccessVars;
-    $EditAccess || &FatalError("You do not have permission to restore this page");
+    GetAccessVars();
+    $EditAccess || FatalError("You do not have permission to restore this page");
 
     if ($ENV{REQUEST_METHOD} eq "GET") {
 
-	&PrintHtmlHeader("Restore $title?");
+	PrintHtmlHeader("Restore $title?");
 	print <<EOF;
 <h2>Restore $title?</h2>
 
@@ -1719,27 +1719,27 @@ Are you sure you want to overwrite the contents of $title? <p>
 <input type=hidden name="Back" value="$title">
 </form>
 EOF
-	&PrintHtmlFooter;
+	PrintHtmlFooter();
 
     }
     else {
 	# Archive the original copy of the page.
 	{
 	    my (%Cgi) = ();
-	    my (%page) = &RetrievePage($title);
-	    &ArchiveCurrentPage($title,\%page);
+	    my (%page) = RetrievePage($title);
+	    ArchiveCurrentPage($title,\%page);
 	}
 
 	# Save a copy of the page with the restored contents.
 	# Note that we have to increment the page's revision manually
 	# because ArchiveCurrentPage() normally does it.
 	$page{Revision} = ++$Cgi{max};
-	&SaveCurrentPage;
+	SaveCurrentPage();
 
 	# Check if we should send email notification.
-	$page{Notification} && &SendNotification;
+	$page{Notification} && SendNotification;
 
-        ReleaseLock;
+        ReleaseLock();
 
         $Cgi{ar}="";
         ReShow($title, "$title version $Cgi{ar} restored ",
@@ -1754,15 +1754,15 @@ EOF
 sub HandlePurge {
     # Get the title of the page and fetch from the database.
     $title = $Cgi{PurgePage};
-    %page = &RetrievePage($title);
+    %page = RetrievePage($title);
 
     # Check the user is allowed to access the page.
-    &GetAccessVars;
+    GetAccessVars();
     $ModifyAccess
-	|| &FatalError("You do not have permission to remove all former versions.");
+	|| FatalError("You do not have permission to remove all former versions.");
 
     if ($ENV{REQUEST_METHOD} eq "GET") {
-	&PrintHtmlHeader("Remove all former versions of $title?");
+	PrintHtmlHeader("Remove all former versions of $title?");
 	print <<EOF;
 <h2>Remove all former versions of $title?</h2>
 
@@ -1774,14 +1774,14 @@ Are you sure you want to delete all previous versions of this page (the current 
 <input type=hidden name=Back value="$title">
 </form>
 EOF
-	&PrintHtmlFooter;
+	PrintHtmlFooter();
 
     }
     else {
 	$PageArchive->purge($title);
 	$page{Revision} = 1;
-	&SaveCurrentPage;
-        ReleaseLock;
+	SaveCurrentPage;
+        ReleaseLock();
         ReShow($title, "All versions previous to the current one have been removed.");
     }
 }
@@ -1796,7 +1796,7 @@ sub HandleGlobalPurge {
         or $UserAdmin->has_attr($CurrentUser,"siteadmin") );
 
     if ($ENV{REQUEST_METHOD} eq "GET") {
-	&PrintHtmlHeader("Purge all archives for $SystemTitle?");
+	PrintHtmlHeader("Purge all archives for $SystemTitle?");
 	print <<EOF;
 <h2>Purge all archives for $SystemTitle?</h2>
 
@@ -1808,7 +1808,7 @@ Are you sure you want to purge <i>all</i> of the archives for <i>every</i> page?
 </form>
 EOF
 
-    &PrintHtmlFooter;
+    PrintHtmlFooter();
     }
     else {
 	my $here = $title;
@@ -1822,9 +1822,9 @@ EOF
 	    $PageArchive->purge($t);
 	    $page{Revision} = 1;
 	    $title = $t;
-	    &SaveCurrentPage;
+	    SaveCurrentPage();
 	}
-	ReleaseLock;
+	ReleaseLock();
 	ReDo(\&HandleGlobalPurge, {GlobalPurge => 1, Back => $Cgi{Back} },
 	     "All archives purged successfully.");
     }
@@ -1836,13 +1836,13 @@ EOF
 
 sub HandleInfo {
     $title = $Cgi{PageInfo};
-    %page = &RetrievePage($title);
+    %page = RetrievePage($title);
 
-    &GetAccessVars;
+    GetAccessVars();
     $ReadAccess
-      || &FatalError("You do not have permission to see this page's information");
+      || FatalError("You do not have permission to see this page's information");
 
-    &PrintHtmlHeader("Information about $title");
+    PrintHtmlHeader("Information about $title");
     print <<EOF;
 <h2>Information about $title</h2>\n\n";
 <h4>General Information</h4>\n\n";
@@ -1865,7 +1865,7 @@ EOF
 		print "<dt><em>No read access</em>\n";
 	    }
             else {
-		$ra =~ s/\+($LinkPattern)/&AsInternalLink($1)/ge;
+		$ra =~ s/\+($LinkPattern)/AsInternalLink($1)/ge;
                 print "<dt><em>Read access</em>\n";
 		print "<dd>$ra\n";
 	    }
@@ -1877,7 +1877,7 @@ EOF
 		print "<dt><em>No edit access</em>\n";
 	    }
             else {
-		$ea =~ s/\+($LinkPattern)/&AsInternalLink($1)/ge;
+		$ea =~ s/\+($LinkPattern)/AsInternalLink($1)/ge;
 		print "<dt><em>Edit access</em>\n";
 		print "<dd>$ea\n";
 	    }
@@ -1889,7 +1889,7 @@ EOF
 		print "<dt><em>No modify access</em>\n";
 	    }
             else {
-		$ma =~ s/\+($LinkPattern)/&AsInternalLink($1)/ge;
+		$ma =~ s/\+($LinkPattern)/AsInternalLink($1)/ge;
 		print "<dt><em>Modify access</em>\n";
 		print "<dd>$ma\n";
 	    }
@@ -1927,7 +1927,7 @@ EOF
 	print "\n</ul> <p>\n\n";
     }
 
-    &PrintHtmlFooter;
+    PrintHtmlFooter();
 }
 
 # HandleProperties
@@ -1939,18 +1939,18 @@ sub HandleProperties {
     %page = RetrievePage($title);
 
     # Check the user is allowed to access the page.
-    &GetAccessVars;
+    GetAccessVars();
     $ModifyAccess
-	|| &FatalError("You do not have permission to edit this page's properties");
+	|| FatalError("You do not have permission to edit this page's properties");
 
     if ($ENV{REQUEST_METHOD} eq "GET") {
-	&PrintHtmlHeader("Edit $title");
-	&PrintPropertiesPage;
-	&PrintHtmlFooter;
+	PrintHtmlHeader("Edit $title");
+	PrintPropertiesPage();
+	PrintHtmlFooter();
     }
     else {
-	&UpdateProperties;
-        ReleaseLock;
+	UpdateProperties();
+        ReleaseLock();
         ReShow($title, "Properties updated for this page.");
     }
 }
@@ -1964,18 +1964,18 @@ sub HandleRename {
 
     # Check that the page exists.
     $PageArchive->defined($title)
-	|| &FatalError("$title hasn't been created yet");
+	|| FatalError("$title hasn't been created yet");
 
     # Check the user is allowed to access the page.
     %page = RetrievePage($title);
-    &GetAccessVars;
+    GetAccessVars();
     $ModifyAccess
-	|| &FatalError("You do not have permission to rename this page");
+	|| FatalError("You do not have permission to rename this page");
 
     if ($ENV{REQUEST_METHOD} eq "GET") {
-	&PrintHtmlHeader("Rename $title");
-	&PrintRenamePage;
-	&PrintHtmlFooter;
+	PrintHtmlHeader("Rename $title");
+	PrintRenamePage();
+	PrintHtmlFooter();
 
     }
     else {
@@ -1986,12 +1986,12 @@ sub HandleRename {
 	$PageArchive->put($Cgi{new},\%page,1);
 
 	unless ($Cgi{copy}) {
-            &DeletePage;
+            DeletePage();
         }
 
         my $refcount;
         if ($Cgi{replacerefs}) {
-            $refcount = &ReplaceReferences;
+            $refcount = ReplaceReferences();
         }
 
 	my $action = $Cgi{copy} ? "copied" : "renamed";
@@ -2001,7 +2001,7 @@ sub HandleRename {
 	    my ($title) =  $Cgi{new};
 	}
 
-        ReleaseLock;
+        ReleaseLock();
         ReShow($Cgi{new}, "$title was $action.",
 	       ($Cgi{replacerefs}
 		? "Global references were changed ".
@@ -2028,7 +2028,7 @@ sub ReplaceReferences {
 	%page = RetrievePage($title,$v);
 	if ($page{PageText} =~ s/\b$old\b/$new/geo) {
 	    $m++;
-	    &SaveCurrentPage;
+	    SaveCurrentPage();
 	}
     }
 
@@ -2053,12 +2053,12 @@ sub HandleDelete {
     %page = RetrievePage($title);
 
     # Check the user is allowed to access the page.
-    &GetAccessVars;
+    GetAccessVars();
     $ModifyAccess
-	|| &FatalError("You do not have permission to delete this page");
+	|| FatalError("You do not have permission to delete this page");
 
     if ($ENV{REQUEST_METHOD} eq "GET") {
-	&PrintHtmlHeader("Delete $title?");
+	PrintHtmlHeader("Delete $title?");
 
 	print <<EOF;
 <h2>Delete $title?</h2>
@@ -2071,22 +2071,22 @@ Are you sure you want to delete $title? <p>
 </form>
 EOF
 
-  &PrintHtmlFooter;
+  PrintHtmlFooter();
 
     }
     else {
 	$page{Revision} = 0;
 	$PageArchive->purge($title);
-	&DeletePage;
-        ReleaseLock;
+	DeletePage();
+        ReleaseLock();
 
-	&PrintHtmlHeader("Deleted $title");
+	PrintHtmlHeader("Deleted $title");
 
 	print "<h2>Deleted $title</h2>\n\n";
 	print "$title was deleted successfully. <p>\n";
 
-	$CuteIcons && &CuteThanks;
-	&PrintHtmlFooter;
+	$CuteIcons && CuteThanks();
+	PrintHtmlFooter();
     }
 }
 
@@ -2104,7 +2104,7 @@ sub HandleMail {
     $title = $Cgi{MailNotify};
     %page = RetrievePage($title);
 
-    &GetAccessVars;
+    GetAccessVars();
 
     # Get the mail list from the page and the user's address.
     my @mail = split($OtherSeparator, $page{MailNotify});
@@ -2114,12 +2114,12 @@ sub HandleMail {
     my %emails = $PageArchive->get($MailPage,0);
     my $address = $emails{$CurrentUser};
     if (! $address) {
-	&HandleEditMail;
+	HandleEditMail();
 	return;
     }
 
     if ($ENV{REQUEST_METHOD} eq "GET") {
-        &PrintHtmlHeader("Email notification for $title");
+        PrintHtmlHeader("Email notification for $title");
 	if (@exists > 0) {
 	    print <<EOF;
 <h2>Remove your email address?</h2>
@@ -2143,7 +2143,7 @@ Add your email address ($address) to this page? <p>
 </form>
 EOF
 	}
-        &PrintHtmlFooter;
+        PrintHtmlFooter();
 
     }
     else {
@@ -2158,8 +2158,8 @@ EOF
 	}
 
 	$page{MailNotify} = join($OtherSeparator, @mail);
-	&SaveCurrentPage;
-	&ReleaseLock;
+	SaveCurrentPage();
+	ReleaseLock();
         ReShow($title,  "$which your email address.");
     }
 }
@@ -2175,7 +2175,7 @@ sub HandleEditMail {
     my $address = $addresses{$CurrentUser} || '';
 
     if ($ENV{REQUEST_METHOD} eq "GET") {
-        &PrintHtmlHeader("Edit email address for $CurrentUser");
+        PrintHtmlHeader("Edit email address for $CurrentUser");
 	print <<EOF;
 <h2>Edit email address for $CurrentUser</h2>
 
@@ -2188,7 +2188,7 @@ Edit your email address below and click on "Save". <p>
 <input type="hidden" name="EditMail" value="true">
 </form>
 EOF
-        &PrintHtmlFooter;
+        PrintHtmlFooter();
     }
     else {
         my $msg;
@@ -2203,7 +2203,7 @@ EOF
 	    $PageArchive->put($MailPage,\%addresses, 0);
 	    $msg = "Your email address has been removed successfully.";
 	}
-        ReleaseLock;
+        ReleaseLock();
         ReShow($Cgi{Back}, $msg);
     }
 }
@@ -2217,7 +2217,7 @@ sub HandleRecentChanges {
 
     # we want to be able to go back to here...
     $title = "RecentChanges";
-    &PrintHtmlHeader("Recent Changes");
+    PrintHtmlHeader("Recent Changes");
     print "<h2>Recent Changes</h2>\n\n";
 
     my @titles = $PageArchive->iterator();
@@ -2243,7 +2243,7 @@ sub HandleRecentChanges {
 
 	my ($sec, $min, $hour, $mday, $mon, $year) = localtime($time);
 	my ($t,$v) = split(/,/,$times{$time});
-	%page = &GetPage($t,$v);
+	%page = GetPage($t,$v);
 
 	if ($mday < $lastday || $mon < $lastmon || $year < $lastyear) {
 	    my $month = (qw(January February March April May June July
@@ -2260,7 +2260,7 @@ sub HandleRecentChanges {
 
 	print "<strong>${hour}:${min}</strong> ";
 	($t,$v) = split(/,/,$times{$time});
-	print &AsInternalLink($t);
+	print AsInternalLink($t);
 	print " . . . . . ";
 	print "by $page{EditUser} from $page{EditHost}. <br>\n";
     }
@@ -2276,7 +2276,7 @@ sub HandleRecentChanges {
             print "<br>";
         }
     }
-    &PrintHtmlFooter;
+    PrintHtmlFooter();
 }
 
 # --------------------------
@@ -2316,9 +2316,9 @@ sub GetAdminInfo {
 	}
     }
     else {
-	&GetCgiInput;
-	&EditAdminRecord;
-	&Cleanup;
+	GetCgiInput();
+	EditAdminRecord();
+	Cleanup();
 	exit;
     }
 }
@@ -2381,7 +2381,7 @@ EOF
 	}
 	print "</form>\n";
 
-	&PrintHtmlFooter;
+	PrintHtmlFooter();
     }
 
     else {
@@ -2459,11 +2459,11 @@ sub ManageUsers {
         unless ($is_admin) {
             my $why = $UserAdmin->unusable();
             unless ($why =~ /does not have/) {
-                &FatalError("Cannot check useradmin authority for ".
+                FatalError("Cannot check useradmin authority for ".
                             "$CurrentUser: $why");
             }
             else {
-                &FatalError("You do not have 'useradmin' authority.");
+                FatalError("You do not have 'useradmin' authority.");
             }
         }
     }
@@ -2572,7 +2572,7 @@ EOF
 	}
 	print "</form>\n";
 
-	&PrintHtmlFooter;
+	PrintHtmlFooter();
     }
 
     else {
@@ -2709,7 +2709,7 @@ sub EditAdminRecord {
 
     if ($ENV{REQUEST_METHOD} eq "GET") {
         note("Presenting page");
-	&PrintHtmlHeader("Customize $ScriptName");
+	PrintHtmlHeader("Customize $ScriptName");
 	print <<EOF;
 <h2>Customize $ScriptName</h2>
 
@@ -2803,7 +2803,7 @@ EOF
 	}
 	print "</form>\n";
 
-	&PrintHtmlFooter;
+	PrintHtmlFooter();
 
     }
     else {
@@ -2859,7 +2859,7 @@ sub UnlockFile {
 	# GET, mode 2: get page name to unlock
 	else {
 	    # create and send the form
-	    &PrintHtmlHeader("Unlock a Page");
+	    PrintHtmlHeader("Unlock a Page");
 	    print <<EOF;
 <h2>Unlock a page</h2>
 
@@ -2871,7 +2871,7 @@ Enter the name of the page to be unlocked:
 <input type=submit value="Unlock">
 </form>
 EOF
-            &PrintHtmlFooter;
+            PrintHtmlFooter();
 	    return;
 	}
     }
@@ -2879,7 +2879,7 @@ EOF
     # GET mode 1 and POST: break arbitrary lock (actually do it)
     # Make sure page is still there!
     my $revision = $PageArchive->max_version($title);
-    &FatalError("Page $title no longer exists, so it can't be unlocked.")
+    FatalError("Page $title no longer exists, so it can't be unlocked.")
       unless defined $revision;
 
     # grab page so can get at ACL
@@ -2888,9 +2888,9 @@ EOF
     note("Unlocking $title");
     unless ($OnlyAdminCanUnlock) {
         # Check the user is allowed to access the page.
-        &GetAccessVars;
+        GetAccessVars();
         $EditAccess
-    	    || &FatalError("You do not have permission to unlock this page");
+    	    || FatalError("You do not have permission to unlock this page");
     }
     else {
         # Check that the user is the administrator.
@@ -2900,7 +2900,7 @@ EOF
     }
 
     # If AggressiveLocking is off, force an error.
-    &FatalError("You can't unlock files if aggressive locking is off.")
+    FatalError("You can't unlock files if aggressive locking is off.")
       unless $AggressiveLocking;
 
     note("unlocking permitted");
@@ -2922,18 +2922,18 @@ sub do_unlock {
         my ($target) = shift;
         # See if the page is locked.
         my ($unlocked, $locker) = $PageArchive->is_unlocked($target);
-        &FatalError("$target is not locked") if $unlocked;
+        FatalError("$target is not locked") if $unlocked;
 
         # Try to unlock it.
         $PageArchive->unlock($target) or
 	  FatalError("Unable to release edit lock.");
         ($unlocked, $discard_this) = $PageArchive->is_unlocked($target);
-        &FatalError("Internal error: unlock of $target failed. ".
+        FatalError("Internal error: unlock of $target failed. ".
                     "Check the HTTP error log for information.")
 	  unless $unlocked;
 
         # Unlocked, print the page.
-	&PrintHtmlHeader("Unlock of $target successful");
+	PrintHtmlHeader("Unlock of $target successful");
 	print "The lock by $locker has been broken successfully. <p>";
 
         ReShow($target, "$target was updated successfully.");
@@ -2991,10 +2991,10 @@ sub GetAccessVars {
 
     # Get each individual permission for this user.
     # Anonymous users *never* have modify access.
-    $ReadAccess   = &CheckAccess("ReadACL");
-    $EditAccess   = ($block_me ? 0 : &CheckAccess("EditACL"));
+    $ReadAccess   = CheckAccess("ReadACL");
+    $EditAccess   = ($block_me ? 0 : CheckAccess("EditACL"));
     $ModifyAccess = ($CurrentUser eq "anonymous" ? 0
-                                                 : &CheckAccess("ModifyACL"));
+                                                 : CheckAccess("ModifyACL"));
 
     # Cascade the permissions.
     $EditAccess = "true" if $ModifyAccess;
@@ -3227,11 +3227,11 @@ $RawInput = '';
 
 $Cgi{UserName} = $CurrentUser;
 
-&GetAdminInfo;
-&GetCgiInput;
+GetAdminInfo();
+GetCgiInput();
 note($AdminUser);
 if ($ENV{REQUEST_METHOD} eq "POST") {
-    &RequestLock;
+    RequestLock();
     $dbIsLocked = 1;
 }
 else {
@@ -3273,13 +3273,13 @@ unless (defined $to_do) {
     ($title) = split(/&/,$ENV{QUERY_STRING});
     $Cgi{ViewPage} = $title;
     note("defaulting to ViewPage on $to_do");
-    &HandleView;
+    HandleView();
 }
 
 if ($ENV{REQUEST_METHOD} eq "POST") {
-  &ReleaseLock;
+  ReleaseLock();
 }
-&Cleanup;
+Cleanup();
 
 }
 
