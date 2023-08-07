@@ -1,3 +1,6 @@
+use strict;
+use warnings;
+
 package PageArchive::RCS;
 
 =head1 NAME
@@ -113,10 +116,10 @@ sub defined {
     my($self, $name, $version) = @_;
     $version = "" unless defined $version;
 
-     # Search directory for filenames matching.
+    # Search directory for filenames matching.
     $self->dh_reset;
-    return grep(/^$name,$version/,readdir $self->{Handle});
     $dir->{Rewound} = 0;
+    return grep(/^$name,$version/,readdir $self->{Handle});
 }
 
 =head2 lock($name)
