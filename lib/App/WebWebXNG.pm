@@ -16,6 +16,14 @@ package App::WebWebXNG;
 # the Perl5 world... At this point it is -w and strict clean; I will be
 # creating classes and objects to hide more of these details as I go along.
 
+# These globals were originally created by the CGI script. We're
+# termination adding them here to get this to build.
+use vars qw(
+      $IconUrl
+      $Max
+      );
+
+# Old webwebx.pl globals.
 use vars qw(
 	    $PageArchive
 	    $ScriptName
