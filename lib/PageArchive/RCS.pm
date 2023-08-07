@@ -118,7 +118,7 @@ sub defined {
 
     # Search directory for filenames matching.
     $self->dh_reset;
-    $dir->{Rewound} = 0;
+    $self->{Rewound} = 0;
     return grep(/^$name,$version/,readdir $self->{Handle});
 }
 
