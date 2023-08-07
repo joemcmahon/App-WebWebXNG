@@ -242,7 +242,8 @@ sub put {
 
     # Open the file, if we can.
     my $target = "$self->{DirName}/$name,$version";
-    unless(open(my $handle, ">$target")) {
+    my $handle;
+    unless(open($handle, ">", "$target")) {
         $self->setError("Cannot write to $target: $!");
         return undef;
     }
