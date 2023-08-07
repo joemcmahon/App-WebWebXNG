@@ -492,7 +492,7 @@ sub FatalError {
 sub ConvertAndPrintBody {
     my($PageTitle) = shift;
 
-    defined %page || FatalError("Page not found in database");
+    keys %page || FatalError("Page not found in database");
 
     my $locked = "";
     if ($AggressiveLocking and defined $PageArchive) {
@@ -1308,7 +1308,7 @@ sub HandleView {
        return;
     }
     %page = RetrievePage($title);
-    defined %page or FatalError("Page was not returned");
+    keys %page or FatalError("Page was not returned");
 
     # Check the user is allowed to access the page.
     &GetAccessVars;
