@@ -1696,7 +1696,7 @@ EOF
 
     $recp || return;
 
-    open( MAIL, "| $MailProgram" );
+    open( MAIL, "|", "$MailProgram" );
     print MAIL <<EOF;
 
 To: $recp
