@@ -1,0 +1,7 @@
+-i=2  # two character indents
+-bar  # opening braces right
+-ce   # cuddled elses
+-nsbl # sub brace on the right
+-cti=0 # default closing token perf
+-nsfs # no spaces for for loop semis
+

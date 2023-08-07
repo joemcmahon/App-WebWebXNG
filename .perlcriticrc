@@ -1,0 +1,63 @@
+### GENERAL
+
+# Only run the policies which we reference to in this file.
+only = 1
+
+# Report ALL levels of severity even the most minor.
+severity = 1
+
+# Throw an exception if any policies in the file are not present.
+profile-strictness = fatal
+
+### POLICIES
+
+# Order policies alphabetically.
+# Set severity to level 5 for policies which should fail perlcritic.t.
+# Level 5 policies should only be ones which detect bugs, not stylistic issues.
+# Any new policies should be discussed on the #perl Slack channel before adding.
+# perlcritic.t may also specify additional custom policies that aren't installed system-wide
+
+[BuiltinFunctions::ProhibitReturnOr]
+severity = 5
+
+[Catalyst::ProhibitUnreachableCode]
+severity = 5
+context_methods = unauthorized send_pixel
+controller_methods = json_finish
+
+[ControlStructures::ProhibitUnreachableCode]
+severity = 5
+
+[Freenode::DeprecatedFeatures]
+severity = 5
+
+[Freenode::POSIXImports]
+severity = 5
+
+[Moo::ProhibitMakeImmutable]
+severity = 5
+
+[Moose::RequireMakeImmutable]
+severity = 5
+equivalent_modules = ZR::Moose Test::Class::Moose
+
+[TestingAndDebugging::RequireUseStrict]
+severity = 5
+equivalent_modules = strictures Moo Moo::Role Role::Tiny MooseX::Singleton MooseX::MethodAttributes::Role HTML::FormHandler::Moose HTML::FormHandler::Moose::Role Test::Class::Moose Test::Class::Moose::Role DBIx::Class::Candy DBIx::Class::Candy::ResultSet ZR::DBIC::ResultSugar ZR::DBIC::ResultSetSugar ZR::Moose ZR::Moose::Role ZR::Moose::Script StarterView::Bundle::Catalyst::Controller ZR::Finance::DBIC::BillingResultSugar Test2::V0 ZR::Test Test::Class::Moose::Lite ZR::Base zrunit
+
+[TestingAndDebugging::RequireUseWarnings]
+severity = 5
+equivalent_modules = strictures Moo Moo::Role Role::Tiny MooseX::Singleton MooseX::MethodAttributes::Role HTML::FormHandler::Moose HTML::FormHandler::Moose::Role Test::Class::Moose Test::Class::Moose::Role DBIx::Class::Candy DBIx::Class::Candy::ResultSet ZR::DBIC::ResultSugar ZR::DBIC::ResultSetSugar ZR::Moose ZR::Moose::Role ZR::Moose::Script StarterView::Bundle::Catalyst::Controller ZR::Finance::DBIC::BillingResultSugar Test2::V0 ZR::Test Test::Class::Moose::Lite ZR::Base zrunit
+
+[TryTiny::RequireBlockTermination]
+severity = 5
+
+[TryTiny::RequireUse]
+severity = 5
+
+[Variables::ProhibitConditionalDeclarations]
+severity = 5
+
+[Modules::ProhibitEvilModules]
+severity = 5
+modules_file = etc/cpan/banned
