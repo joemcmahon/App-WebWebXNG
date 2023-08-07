@@ -175,7 +175,7 @@ sub nflock($;$;$;$) {
         # time, fetch the current lock info and return it.
         sleep $Check;
         if ($naptime && time > $start+$naptime) {
-            open(OWNER, "< $whosegot") || last; # exit "if"!
+            open(OWNER, "<", $whosegot) || last; # exit "if"!
             $lockee = <OWNER>;
 	          close OWNER;
             chomp($lockee);
@@ -185,7 +185,7 @@ sub nflock($;$;$;$) {
 
     # We were able to create the lock directory, so we have possession
     # of the lock. Write the locker info out and return success.
-    sysopen(OWNER, $whosegot, O_WRONLY|O_CREAT|O_EXCL)
+    sysopen(OWNER, ">", $whosegot, O_WRONLY|O_CREAT|O_EXCL)
                             or fatal("can't create $whosegot: $!");
     my $locktime = scalar(localtime());
     my $line = sprintf("%s from %s since %s\n", $locker, $lockhost, $locktime);
@@ -234,7 +234,7 @@ sub nlock_state($) {
 
     return (1, undef) if ! -d $lockname;
 
-    open(OWNER, "< $whosegot") || return (1, undef);
+    open(OWNER, "<", $whosegot) || return (1, undef);
     my $lockee = <OWNER>;
     close(OWNER);
     chomp($lockee);
