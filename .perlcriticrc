@@ -20,11 +20,6 @@ profile-strictness = fatal
 [BuiltinFunctions::ProhibitReturnOr]
 severity = 5
 
-[Catalyst::ProhibitUnreachableCode]
-severity = 5
-context_methods = unauthorized send_pixel
-controller_methods = json_finish
-
 [ControlStructures::ProhibitUnreachableCode]
 severity = 5
 
@@ -60,4 +55,4 @@ severity = 5
 
 [Modules::ProhibitEvilModules]
 severity = 5
-modules_file = etc/cpan/banned
+modules_file = ~/.etc/cpan/banned
