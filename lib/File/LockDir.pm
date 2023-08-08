@@ -241,12 +241,12 @@ sub nflock {
 
   # We were able to create the lock directory, so we have possession
   # of the lock. Write the locker info out and return success.
-  sysopen( OWNER, ">", $whos_got, O_WRONLY | O_CREAT | O_EXCL )
+  sysopen( my $owner, ">", $whos_got, O_WRONLY | O_CREAT | O_EXCL )
     or $self->fatal("can't create $whos_got $!");
   my $locktime = scalar( localtime() );
   my $line = sprintf( "%s from %s since %s\n", $locker, $lockhost, $locktime );
-  print OWNER $line;
-  close(OWNER)
+  print $owner $line;
+  close($owner)
     or $self->fatal("close failed for $whos_got $!");
   $self->locked_files( $pathname, $line );
   return ( 1, undef );
