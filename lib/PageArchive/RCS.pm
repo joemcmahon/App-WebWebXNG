@@ -105,7 +105,7 @@ sub DESTROY {
 
 =head1 INSTANCE METHODS
 
-=head1 defined($name, $version)
+=head2 defined($name, $version)
 
 Determine whether or not an entry exists.
 
