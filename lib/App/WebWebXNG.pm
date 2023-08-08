@@ -1019,7 +1019,8 @@ sub GetCgiInput {
 
   # Process it.
   $RawInput =~ s/\0//g;    # Kill nulls
-  foreach $_ ( split( /&/, $RawInput ) ) {
+  foreach my $item ( split( /&/, $RawInput ) ) {
+    $_ = $item;                         # For simpler match and cleanup
     s/\+/ /g;                           # Convert + signs to spaces.
     s/\%(..)/pack("C", hex($1))/geo;    # Decode hex encoded characters.
     s/$FieldSeparator//g;               # Remove any field separator characters.
@@ -1035,10 +1036,10 @@ sub GetCgiInput {
 
   if ($DebugCgiValues) {
     my @output = "Cgi values:";
-    foreach ( sort keys %Cgi ) {
-      my $a = $Cgi{$_};
+    foreach my $key ( sort keys %Cgi ) {
+      my $a = $Cgi{$key};
       $a =~ s/\n/\\n/g;
-      push @output, $_ . " = " . $a;
+      push @output, $key . " = " . $a;
     }
     note(@output);
   }
@@ -1263,7 +1264,7 @@ sub UpdateContents {
   %links = ();
   %links = split( $OtherSeparator, $page{Links} ) if defined $page{Links};
   my %newlinks;
-  foreach $link ( keys(%links) ) {
+  foreach my $link ( keys(%links) ) {
     $link =~ /^r($ReferencePattern)/ || next;
     my $searchfor = $link;
     $searchfor =~ s/^r($ReferencePattern)/$1/;
@@ -1358,7 +1359,7 @@ sub HandleSearch {
 
   note("Starting search");
   my $key;
-  foreach $key (@keys) {
+  foreach my $key (@keys) {
     my ( $t, $v ) = split( /,/, $key );
     %page = RetrievePage( $t, $v );
     $t =~ /^$LinkPattern$/ || next;
@@ -1459,8 +1460,8 @@ sub HighlightDiffs {
   my ($index) = 0;
 
   # Loop through the archive words.
-  my ( $curr, $word );
-  foreach $word (@ar) {
+  my $curr;
+  foreach my $word (@ar) {
     $index > $#curr && last;
     $curr = $curr[ $index++ ];
     if ( $word =~ /\W+/ && $curr =~ /\W+/ ) {
@@ -1676,7 +1677,7 @@ sub SendNotification {
 
   my %emails = $PageArchive->get( $MailPage, 0 );
 
-  foreach $name (@mail) {
+  foreach my $name (@mail) {
     ( $address = $emails{$name} ) || next;
     push( @addresses, $address );
   }
@@ -1688,8 +1689,8 @@ sub SendNotification {
 
   $recp || return;
 
-  open( MAIL, "|", "$MailProgram" );
-  print MAIL <<EOF;
+  open( my $mail, "|", "$MailProgram" );
+  print $mail <<EOF;
 
 To: $recp
 From: WebWebX
@@ -1847,7 +1848,7 @@ EOF
     my $here  = $title;
     my @names = $PageArchive->iterator();
     my $name;
-    foreach $name (@names) {
+    foreach my $name (@names) {
       my ( $t, $v ) = split( /,/, $name );
       next unless $t;
       %page = RetrievePage( $t, $v );
@@ -1934,8 +1935,8 @@ EOF
   my @mail   = split( $OtherSeparator, $page{MailNotify} );
   if (@mail) {
     print "Users to be notified:<ul>\n";
-    foreach (@mail) {
-      print "<li>$_ ($emails{$_})\n";
+    foreach my $user (@mail) {
+      print "<li>$user ($emails{$_})\n";
     }
     print "</ul><p>\n";
     print "Last notification was on ", scalar( localtime( $page{LastMailed} ) );
@@ -2055,8 +2056,8 @@ sub ReplaceReferences {
   my ( $t, $n, $m, %page );
 
   my @titles = $PageArchive->iterator();
-  foreach $t (@titles) {
-    my ( $title, $v ) = split( /,/, $t );
+  foreach my $raw (@titles) {
+    my ( $title, $v ) = split( /,/, $raw );
     $title =~ /^$LinkPattern$/ or next;
     $n++;
 
@@ -2254,7 +2255,7 @@ sub HandleRecentChanges {
   my @titles       = $PageArchive->iterator();
   my %locked_pages = ();
 
-  foreach $title (@titles) {
+  foreach my $title (@titles) {
     my ( $t, $v ) = split( /,/, $title );
     %page = RetrievePage( $t, $v );
     $t =~ /^$LinkPattern$/ or next;
@@ -2269,7 +2270,7 @@ sub HandleRecentChanges {
   my $lastyear = 100;
 
   my $time;
-  foreach $time ( reverse sort ( keys(%times) ) ) {
+  foreach my $time ( reverse sort ( keys(%times) ) ) {
     ++$count > $MaxRecentChanges && last;
 
     my ( $sec, $min, $hour, $mday, $mon, $year ) = localtime($time);
@@ -2334,18 +2335,15 @@ sub GetAdminInfo {
     load_global( 1, \%rec, \@AdminInfoFields );
     if ($DebugAdminValues) {
       my @notes = "Admin settings:";
-      foreach ( sort keys %rec ) {
-        $^W = 0;
-        push @notes, $_ . " = " . $rec{$_};
-        $^W = 1;
+      foreach my $key ( sort keys %rec ) {
+        push @notes, $key . " = " . (exists $rec{$key} and defined $rec{$key} ? $rec{$key} : "undef");
       }
       note(@notes);
     }
     if ($DebugEnvVars) {
       my @notes = "Environment:";
-      foreach ( sort keys %ENV ) {
-        $^W = 0;
-        push @notes, $_ . " = " . $ENV{$_};
+      foreach my $key ( sort keys %ENV ) {
+        push @notes, $key . " = " . (exists $ENV{$key} and defined $ENV{$key} ? $ENV{$key} : "undef");
       }
       note(@notes);
     }
@@ -3015,8 +3013,7 @@ sub CheckAccess {
   $users =~ /\b$CurrentUser\b/ && return "true";
 
   # Check each of the ACL pages.
-  my $bit;
-  foreach $bit (@pages) {
+  foreach my $bit (@pages) {
     my %page = RetrievePage($bit);
     $page{PageText} =~ /^\+.*\b$CurrentUser\b/m && return "true";
   }
@@ -3086,8 +3083,11 @@ sub note {
   my $space = " " x ( 1 + length($now) );
   local $_;
   push @DebugMsgs, "$now: " . shift(@_) . "\n";
-  foreach (@_) { push @DebugMsgs, "$space $_\n"; }
+  foreach my $part (@_) { push @DebugMsgs, "$space $part\n"; }
 }
+
+# XXX: These two functions need to be handled in a better way.
+#      Leaving them here for the moment, but they should be replaced soon.
 
 # load_global( mode, hash_ref, array_ref )
 #
@@ -3107,7 +3107,7 @@ sub load_global {
       push @c, "\$$key = \$h->{$key}" if exists $h->{$key};
     }
   }
-  eval join( ';', @c );
+  eval join( ';', @c ); ## no critic qw(BuiltinFunctions::ProhibitStringyEval)
 }
 
 # store_global( hash_ref, array_ref )
@@ -3121,7 +3121,7 @@ sub store_global {
   foreach my $key (@k) {
     push @c, "\$h->{$key} = \$$key";
   }
-  eval join( ';', @c );
+  eval join( ';', @c ); ## no critic qw(BuiltinFunctions::ProhibitStringyEval)
 }
 
 # Cleanup
@@ -3320,8 +3320,8 @@ sub main {
     GlobalPurge   => \&HandleGlobalPurge,
   );
   my $to_do = undef;
-  foreach ( keys %Cgi ) {
-    if ( defined( $to_do = $jump_table{$_} ) ) {
+  foreach my $key ( keys %Cgi ) {
+    if ( defined( $to_do = $jump_table{$key} ) ) {
       note("Executing $_");
       &$to_do;
       last;
