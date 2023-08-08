@@ -65,6 +65,20 @@ my %Locked_Files = ();
 
 =head2 new(%params)
 
+Creates the object. Parameters:
+
+=item note: note() callback. Defaults to print to STDERR.
+
+=item fatal: fatal() callback. Defaults to croak().
+
+=item debug: 1 if debug is to be enabled. Defaults to 0 (no debugging).
+
+=item sleep: number of seconds to sleep between tries. Defaults to DEFAULT_SLEEP_TIME.
+
+=item tries: Number of tries before we give up. Defaults to DEFAULT_TRIES.
+
+=cut
+
 sub new {
     my ($class, %params) = @_;
     my $self = {};
@@ -72,34 +86,37 @@ sub new {
 
     $self->locked_files({});
 
-    my (%params) = @_;
-
-    # Valid parameters:
-    #  - note: note() callback
-    #  - fatal: fatal() callback
-    #  - debug: 1 if debug is to be enabled
-    #  - sleep: number of seconds to sleep between tries
-    #  - tries: Number of tries before we give up.
-    #
-
     # If a log function was supplied, use it. Otherwise, print
     # log/debug messages to STDERR.
     die "logger is not a code ref" unless ref $params{logger} eq "CODE";
-    $self->{_notesub = $params{logger} || sub { print STDERR @_ };
+    $self->{_notesub} = ($params{logger} || sub { print STDERR @_ });
 
     # If a fatal function was supplied, use it. Else, use croak instead.
-    die "fatal is not a code ref" unless ref $params{Fatal} eq "CODE";
-    $self->{_fatalsub} = $params{fatal}  || sub { croak @_ };
+    die "fatal is not a code ref" unless ref $params{fatal} eq "CODE";
+    $self->{_fatalsub} = ($params{fatal}  || sub { croak @_ });
 
-    $self->{_debug} = 1 if $params{debug};
+    $self->{_debug} = 1 if $params{debug} || 0;
     $self->{_sleep_seconds} = +$params{sleep} || DEFAULT_SLEEP_TIME;
+
     return $self;
 }
+
+=head2 note(@args)
+
+Sends its arguments to the note callback.
+
+=cut
 
 sub note {
   my($self, @args) = @_;
   &{$self->{_notesub}}->(@args);
 }
+
+=head2 fatal
+
+Sends its argumetns to the fatal callback.
+
+=cut
 
 sub fatal {
   my($self, @args) = @_;

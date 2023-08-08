@@ -82,8 +82,11 @@ sub new {
         $self->{LockLimit} = 30;
     }
 
-    # (re)initialize File::LockDir.
-    File::LockDir::init(%params);
+    # Initialize File::LockDir.
+    $self->_locker(File::LockDir->new(
+        fatal  => $self->fatal,
+        logger => $self->logger,
+    ));
 
     # See if we can read the directory; return undef if not.
     unless(opendir($self->{Handle},$dirname)) {
@@ -135,7 +138,7 @@ Returns undef if the entry can't be locked, true otherwise.
 sub lock {
     my ($self, $name, $who, $host) = @_;
     my ($which,$locked_by)  =
-        nflock("$self->{DirName}/$name", $self->lock_limit(), $who, $host);
+        $self->locker->nflock("$self->{DirName}/$name", $self->lock_limit(), $who, $host);
     return ($which, $locked_by);
 }
 
@@ -149,7 +152,7 @@ Returns undef if the entry wasn't locked, true otherwise.
 
 sub unlock {
     my ($self, $name) = @_;
-    nunflock("$self->{DirName}/$name");
+    $self->locker->nunflock("$self->{DirName}/$name");
 }
 
 =head2 is_unlocked($name)
@@ -163,7 +166,7 @@ Returns: (1, undef) if the entry is unlocked
 
 sub is_unlocked {
     my ($self,$name) = @_;
-    return nlock_state("$self->{DirName}/$name");
+    return $self->locker->nlock_state("$self->{DirName}/$name");
 }
 
 =head2 max_version($name)
@@ -355,8 +358,8 @@ Set calback for message handling
 
 sub logger {
    my $self = shift;
-   $self->{Logger} = shift if int @_;
-   $self->{Logger};
+   $self->{_logger} = shift if int @_;
+   $self->{_logger};
 }
 
 =head2 fatal(REF)
@@ -367,8 +370,8 @@ Set calback for message handling
 
 sub fatal {
    my $self = shift;
-   $self->{Fatal} = shift if int @_;
-   $self->{Fatal};
+   $self->{_fatal} = shift if int @_;
+   $self->{_fatal};
 }
 
 =head2 setError($msg, $msg, $msg ...)
@@ -429,6 +432,12 @@ sub dh_reset {
 	      rewinddir $self->{Handle};
     }
     $success;
+}
+
+sub _locker {
+  my( $self, $locker_object ) = @_;
+  $self->{_locker} = $locker_object if defined $locker_object;
+  $self->{_locker};
 }
 
 1;
