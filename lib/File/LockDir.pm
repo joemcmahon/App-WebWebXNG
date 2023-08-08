@@ -142,8 +142,11 @@ Returns a value only when fetching an entry.
 sub locked_files {
   my ( $self, @args ) = @_;
 
+  return $self->{_locked_files} unless @args;
+
   if ( @args == 1 and ref $args[0] eq 'HASH' ) {
     $self->{_locked_files} = $args[0];
+    return $args[0];
   } else {
     my ( $key, $value ) = @args;
 
@@ -152,12 +155,10 @@ sub locked_files {
         return $self->{_locked_files}{ $args[0] };
       } else {
         $self->{_locked_files}{ $args[0] } = $args[1];
-        ``;
+        return $args[1];
       }
     }
   }
-
-  return;
 }
 
 =head2 sleep
