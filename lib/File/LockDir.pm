@@ -88,13 +88,13 @@ sub new {
     # If a valid log function was supplied, use it. Otherwise, print
     # log/debug messages to STDERR.
     if (defined $params{logger}) {
-      die "logger is not a code ref" unless ref $params{logger} eq "CODE";
+      croak "logger is not a code ref" unless ref $params{logger} eq "CODE";
     }
-    $self->{_notesub} = $params{logger} ? $params{logger} : sub { print STDERR @_ };
+    $self->{_notesub} = $params{logger} ? $params{logger} : sub { warn @_, "\n" };
 
     # If a valid fatal function was supplied, use it. Else, use croak instead.
     if (defined $params{fatal}) {
-      die "fatal is not a code ref" unless ref $params{fatal} eq "CODE";
+      croak "fatal is not a code ref" unless ref $params{fatal} eq "CODE";
     }
     $self->{_fatalsub} = $params{fatal} ? $params{fatal} : sub { croak @_ };
 
