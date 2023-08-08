@@ -45,6 +45,8 @@ Create a new PageArchive object:
 
 sub new {
     my ($class, $dirname, %params) = @_;
+    die "No page storage directory supplied" unless $dirname;
+
     my $self = {};
     bless $self,$class;
 
