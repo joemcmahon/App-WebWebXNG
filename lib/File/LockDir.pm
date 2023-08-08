@@ -215,7 +215,8 @@ The hostname of the host locking the file.
 =back
 
 This function I<only> locks the file if possible. It does not verify
-that the requestor owns the lock if the file is already locked.
+that the requestor owns the lock if the file is already locked; the
+requestor I<must> check the returned owner value.
 
 Locking is done by creating a "lockdir" and writing a status file into it.
 The lockdir was used because creating it is an atomic transaction on NFS.
