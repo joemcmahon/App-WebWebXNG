@@ -5,7 +5,7 @@ package File::LockDir;
 
 =head1 NAME
 
-File::LockDir - file-level locking
+File::LockDir - file-level locking with state caching
 
 =head1 SYNOPSIS
 
@@ -41,6 +41,11 @@ one C<File::LockDir> configuration per wiki instance.
 Locking is done by creating a lock directory instead of opening, writing,
 and closing a file because the wiki was on a shared NFS volume; creating a directory
 was (is?) atomic on NFS.
+
+The object maintains a lock status cache; originally this was because page
+archive lived on an NFS volume, and access to the files in the archive
+was much slower than regular disk access. It still serves to speed up
+some operations, so it's been kept in this new version.
 
 =cut
 
@@ -100,6 +105,7 @@ sub new {
 
     $self->{_debug} = $params{debug} ? 1 : 0;
     $self->{_sleep_seconds} = +$params{sleep} || DEFAULT_SLEEP_TIME;
+    $self->{_tries} = +$params{tries} || DEFAULT_TRIES;
 
     return $self;
 }
@@ -118,7 +124,7 @@ sub note {
 
 =head2 fatal
 
-Sends its argumetns to the fatal callback.
+Sends its arguments to the fatal callback.
 
 =cut
 
@@ -183,6 +189,17 @@ sub debug {
   return $self->{_debug};
 }
 
+=head3 tries
+
+Getter for the try count.
+
+=cut
+
+sub tries {
+  my ($self) = @_;
+  return $self->{_tries};
+}
+
 =head2 nflock($path, $delay, $locking_user, $hostname)
 
 nflock actually locks a file if possible by creating a lockfile
@@ -237,8 +254,6 @@ sub nflock {
 
   my $lockname = _name2lock($pathname);
   my $whos_got = File::Spec->catfile($lockname,"owner");
-  my $start    = time();
-  my $missed   = 0;
 
   # if in the locked file cache, return the contents
   if ( my $owner = $self->locked_files($pathname) ) {
@@ -246,57 +261,65 @@ sub nflock {
     return (1, $owner);
   }
 
-  if ( !-w $lockname ) {
-    $self->fatal("can't write to lockfile $lockname");
-  }
-
-  # Keep trying to get the lock until we give up.
+  # Stay in this block until we either successfully create the
+  # lock directory, we run out of tries, or we time out.
+  my $tries_left = $self->tries;
+  $self->note("lock $pathname: attempt to obtain lock");
+SPIN:
   while (1) {
-    last if mkdir( $lockname, 0777 );
+    $self->note("lock $pathname: try $tries_left") if $self->debug;
+    $tries_left--;
 
-    # If we've run out of tries, die. (Caller is expecting this.)
-    $self->fatal("can't get $lockname: $!")
-      if $missed++ > $self->{_tries}
-      && !-d $lockname;
+    # If the mkdir succeeds, we have control and can lock.
+    # (If the directory is already there, the mkdir fails;
+    # when we create the directory, no one else can do so,
+    # so the process that successfully creates the directory
+    # itself wins the race and can atomically write the lock.)
+    #
+    # If there's a permissions problem -- there shouldn't be,
+    # but it's possible -- then the mkdir will fail until we
+    # reach the timeout and then we'll return a lock fail.
+    last if mkdir( $lockname, 0700 );
+    $self->note("lock $pathname: did not get lock") if $self->debug;
 
-    # If debugging, show us who has the lock now.
-  DEBUG:
-    if ( $self->debug ) {
+    # If we've run out of tries, and we still don't have the lock,
+    # die. (Caller is expecting this.)
+    $self->fatal("can't obtain lock $lockname: $!")
+      if $tries_left == 0 && !-d $lockname;
 
-      # If we can't open the "who owns this" file, don't try the
-      # rest of this block.
-      my $lockee = _read_lock_info($whos_got);
-      last DEBUG if not defined $lockee;
-      $self->note(
-        sprintf(
-          "%s $0\[$$]: lock on %s held by %s\n",
-          scalar( localtime() ),
-          $pathname, $lockee
-        )
-      );
-    }
-
-    # Wait a bit to see if we can get it. If we've used up our
-    # time, fetch the current lock info and return it.
+    # Wwe have tries left, so wait a bit, try to read the owner
+    # info, and log it if we got it and we're debugging. If
+    # we've used up our time, return failure and the current
+    # owner info.
     CORE::sleep $self->sleep;
-    if ( $naptime && time > $start + $naptime ) {
-      my $lockee = _read_lock_info($whos_got);
-      return ( undef, $lockee );
+
+    my $lockee = _read_lock_info($whos_got) // "(unknown)";
+    $self->note("lock #pathname: Lock held by '$lockee'") if $self->debug;
+
+    if ( $tries_left == 0) {
+      $self->note("lock $pathname: failed - held by $lockee") if $self->debug;
+      return ( 0, $lockee );
     }
   }
 
-  # We were able to create the lock directory, so we have possession
-  # of the lock. Write the locker info out and return success.
+  # We dropped out of the SPIN loop, so we were able to create
+  # the lock directory, and we have possession of the lock.
+  # Write the owner info out and return success.
   sysopen( my $owner, $whos_got, O_WRONLY | O_CREAT | O_EXCL )
     or $self->fatal("can't create $whos_got $!");
+
   my $locktime = scalar( localtime() );
   chomp $locktime;
+
   my $line = sprintf( "%s from %s since %s\n", $locker, $lockhost, $locktime );
   print $owner $line;
+
   close($owner)
     or $self->fatal("close failed for $whos_got $!");
+
   $self->locked_files( $pathname, $line );
-  return ( 1, undef );
+  $self->note("lock $pathname: successful");
+  return ( 1, $line );
 }
 
 =head2 nfunlock($pathnane)
@@ -319,7 +342,7 @@ sub nfunlock {
   my $whos_got = "$lockname/owner";
   unlink($whos_got);
   $self->note("releasing lock on $lockname") if $self->debug;
-  $self->delete_lock_for($pathname);
+  $self->_delete_lock_for($pathname);
   delete $Locked_Files{$pathname};
   return rmdir($lockname);
 }
@@ -362,7 +385,7 @@ sub _name2lock {
 
 sub _read_lock_info {
   my ($whos_got) = @_;
-  open( my $owner, "<", $whos_got ) || last;    # exit "if"!
+  open( my $owner, "<", $whos_got ) || return;
   my $lockee = <$owner>;
   close $owner;
   chomp($lockee);
