@@ -152,7 +152,7 @@ Returns undef if the entry wasn't locked, true otherwise.
 
 sub unlock {
     my ($self, $name) = @_;
-    $self->locker->nunflock("$self->{DirName}/$name");
+    $self->locker->nfunlock("$self->{DirName}/$name");
 }
 
 =head2 is_unlocked($name)

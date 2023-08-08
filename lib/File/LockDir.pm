@@ -44,11 +44,6 @@ was (is?) atomic on NFS.
 
 =cut
 
-use Exporter;
-use vars qw(@ISA @EXPORT);
-@ISA    = qw(Exporter);
-@EXPORT = qw(nflock nunflock nlock_state);
-
 use constant DEFAULT_SLEEP_TIME => 5;
 use constant DEFAULT_TRIES      => 10;
 
@@ -269,7 +264,7 @@ sub nflock {
   return ( 1, undef );
 }
 
-=head2 nunflock($pathnane)
+=head2 nfunlock($pathnane)
 
 Unlocks the supplied path by removing the lock data file and then
 removing the lock directory (again, an atomic operation on NFS).
@@ -282,9 +277,9 @@ removing the lock directory (again, an atomic operation on NFS).
 
 =cut
 
-sub nunflock {
+sub nfunlock {
   my($self, $pathname) = @_;
-  croak "No pathname passed to nunflock" unless defined $pathname;
+  croak "No pathname passed to nfunlock" unless defined $pathname;
   my $lockname = _name2lock($pathname);
   my $whos_got = "$lockname/owner";
   unlink($whos_got);
