@@ -62,6 +62,8 @@ my %Locked_Files = ();
 
 Creates the object. Parameters:
 
+=over
+
 =item note: note() callback. Defaults to print to STDERR.
 
 =item fatal: fatal() callback. Defaults to croak().
@@ -71,6 +73,8 @@ Creates the object. Parameters:
 =item sleep: number of seconds to sleep between tries. Defaults to DEFAULT_SLEEP_TIME.
 
 =item tries: Number of tries before we give up. Defaults to DEFAULT_TRIES.
+
+=back
 
 =cut
 
