@@ -5,6 +5,27 @@ use warnings;
 
 package App::WebWebXNG;
 
+=head1 NAME
+
+App::WebWebXNG - core module for WebWebXNG
+
+=head1 SYNOPSIS
+
+    # Handwaving the initialization, which will be needed...
+    use App::WebWebXNG;
+    my $wiki = App::WebWebXNG->new();
+    $wiki->run;
+
+=head1 DESCRIPTION
+
+C<App::WebWebXNG> is a minimal wiki implemented in Perl. It concentrates on
+providing easy-to-use access control over media types. This version is a
+port of the original WebWebX from 1998 to a modern Perl stack. It is hoped
+that this will, over time, provide a useful basic wiki that can be deployed
+easily pretty much anywhere Perl can be installed.
+
+=cut
+
 # XXX: This is bulk-imported from the original WebWebX. It obviously
 #      can't stay like this (most of this is going to move into objects
 #      instantiated by this modules instance), but this gets us started
@@ -196,14 +217,24 @@ sub _setup_kludge {
   $MailProgram = "/usr/lib/sendmail";
 }
 
+=head1 DISPLAY
+
+These methods provide basic dispatch and page formatting code. The dispatch code
+will almost certainly have to be replaced when we move to Mojolicious.
+
+=cut
+
 # ----------------
 # HTML Subroutines
 # ----------------
 
-# ReDo ($moderef, $hashref, $msg, $msg ...)
-#
-# Re-execute a mode. Sets Cgi hash to values specified, and sets
-# status message (if one is supplied).
+=head2  ReDo ($moderef, $hashref, $msg, $msg ...)
+
+Re-execute a mode. Sets Cgi hash to values specified, and sets
+status message (if one is supplied). Used to redispatch a request.
+
+=cut
+
 sub ReDo {
   note("ReDoing");
   my $sub   = shift;
@@ -215,9 +246,12 @@ sub ReDo {
   &$sub;
 }
 
-# ReShow ($page, $message, $message, ...)
-#
-# Show the page again, with any messages as appropriate.
+=head2 ReShow ($page, $message, $message, ...)
+
+Show the same page again, adding any messages as appropriate.
+
+=cut
+
 sub ReShow {
   my ( $page, @messages ) = @_;
   push @GlobalStatus, @messages;
@@ -225,12 +259,18 @@ sub ReShow {
   HandleView();
 }
 
-# PrintHtmlHeader (title)
-#
-# Print the head of the HTML page the first time it is called. Subsequent
-# calls produce no output.
-#
-# title - The title to place in the header.
+=head2 PrintHtmlHeader (title)
+
+Print the head of the HTML page the first time it is called. Subsequent
+calls produce no output.
+
+=over
+
+=item title - The title to place in the header.
+
+=back
+
+=cut
 
 sub PrintHtmlHeader {
   return if $PrintedHtmlHeader;
@@ -282,9 +322,11 @@ EOF
   }
 }
 
-# PrintHtmlFooter ()
-#
-# Prints the foot of the HTML page.
+=head2 PrintHtmlFooter ()
+
+Prints the foot of the HTML page.
+
+=cut
 
 sub PrintHtmlFooter {
   print "\n";
@@ -303,9 +345,11 @@ sub PrintHtmlFooter {
   print "</body>\n</html>\n";
 }
 
-# PrintIcons
-#
-# Prints whatever icons are appropriate for the current page.
+=head2 PrintIcons
+
+Prints whatever icons are appropriate for the current page.
+
+=cut
 
 sub PrintIcons {
   $title = "" unless defined $title;
@@ -501,14 +545,22 @@ sub PrintIcons {
   print "\n<center>\n";
 }
 
-# IconLink (link, icon, alt)
-#
-# Prints an "icon" link, formatting appropriately for "icons on" or
-# "icons off".
-#
-# link - the CGI portion of the link
-# icon - the icon to use
-# alt  - the alt text to use
+=head2 IconLink (link, icon, alt)
+
+Prints an "icon" link, formatting appropriately for "icons on" or
+"icons off".
+
+=over
+
+=item link - the CGI portion of the link
+
+=item  icon - the icon to use
+
+=item  alt  - the alt text to use
+
+=back
+
+=cut
 
 sub IconLink {
   my ( $link, $icon, $alt ) = @_;
@@ -522,11 +574,17 @@ sub IconLink {
   }
 }
 
-# FatalError (message)
-#
-# Prints an error message on the HTML page and exits the script.
-#
-# message - The message to display.
+=head2 FatalError (message)
+
+Prints an error message on the HTML page and exits the script.
+
+=over
+
+=item message - The message to display.
+
+=back
+
+=cut
 
 sub FatalError {
   my ($message) = @_;
@@ -555,11 +613,13 @@ sub FatalError {
   croak($message);
 }
 
-# ConvertAndPrintBody
-#
-# Assumes that the HTML page has been retrieved from the database
-# into the hash "page". Converts the page body into sensible HTML
-# and print it out.
+=head2 ConvertAndPrintBody
+
+Assumes that the HTML page has been retrieved from the database
+into the hash "page". Converts the page body into sensible HTML
+and print it out.
+
+=cut
 
 sub ConvertAndPrintBody {
   my ($PageTitle) = shift;
@@ -677,13 +737,19 @@ s/\b((webweb)|(http)|(ftp)|(mailto)|(news)|(file)|(gopher)):[^\s\<\>\[\]"'\(\)]*
   EmitCode( "", 0 );
 }
 
-# AsInternalLink (title)
-#
-# Creates an internal link to the page title given as an
-# argument. If the page does not exist a linked question
-# mark will be linked directly to the edit page.
-#
-# title - The title of the page to link to.
+=head2 AsInternalLink (title)
+
+Creates an internal link to the page title given as an
+argument. If the page does not exist a linked question
+mark will be linked directly to the edit page.
+
+=over
+
+=item title - The title of the page to link to.
+
+=back
+
+=cut
 
 sub AsInternalLink {
   my ($NewTitle) = @_;
@@ -700,23 +766,35 @@ sub AsInternalLink {
   }
 }
 
-# AsEditableLink (title)
-#
-# Creates a straight link to an editable internal page.
-#
-# title - the title of the page to link to
+=head2 AsEditableLink (title)
+
+Creates a straight link to an editable internal page.
+
+=over
+
+=item title - the title of the page to link to
+
+=back
+
+=cut
 
 sub AsEditableLink {
   my ($EditTitle) = @_;
   "<a href=\"$ScriptUrl?EditPage=$EditTitle&Back=$Cgi{Back}\">$EditTitle</a>";
 }
 
-# AsExternalLink (ref)
-#
-# Creates an external link to the URL represented by the
-# given reference.
-#
-# reference - Used to look up the external URL.
+=head2 AsExternalLink (ref)
+
+Creates an external link to the URL represented by the
+given reference.
+
+=over
+
+=item reference - Used to look up the external URL.
+
+=back
+
+=cut
 
 sub AsExternalLink {
   my ($ref) = @_;
@@ -735,10 +813,12 @@ sub AsExternalLink {
   }
 }
 
-# AsLiteralUrl
-#
-# Creates a link to a literal URL stored in an array
-# called "LiteralUrl".
+=head2 AsLiteralUrl
+
+Creates a link to a literal URL stored in an array
+called "LiteralUrl".
+
+=cut
 
 sub AsLiteralUrl {
   my ($number) = @_;
@@ -754,10 +834,12 @@ sub AsLiteralUrl {
     : "<a href=\"$url\">$url</a>";
 }
 
-# EmitCode
-#
-# Deals with matching up the beginning and end tags for the
-# various lists which appear.
+=head2 EmitCode
+
+Deals with matching up the beginning and end tags for the
+various lists which appear.
+
+=cut
 
 sub EmitCode {
   my ( $code, $depth ) = @_;
@@ -781,10 +863,12 @@ sub EmitCode {
   }
 }
 
-# PrintEditPage
-#
-# Prints an HTML form in which the user can edit the current
-# page.
+=head2 PrintEditPage
+
+Prints an HTML form in which the user can edit the current
+page.
+
+=cut
 
 sub PrintEditPage {
   $_ = $page{PageText};
@@ -822,10 +906,12 @@ EOF
 
 }
 
-# PrintAppendPage
-#
-# Prints an HTML form in which the user can edit text to be appended
-# to the current page.
+=head2 PrintAppendPage
+
+Prints an HTML form in which the user can edit text to be appended
+to the current page.
+
+=cut
 
 sub PrintAppendPage {
 
@@ -860,10 +946,12 @@ Anything you enter below will be <b>appended</b> to the original text
 EOF
 }
 
-# PrintEditLinkPage
-#
-# Prints an HTML form in which the user can edit an external
-# link from the current page.
+=head2 PrintEditLinkPage
+
+Prints an HTML form in which the user can edit an external
+link from the current page.
+
+=cut
 
 sub PrintEditLinkPage {
 
@@ -882,10 +970,12 @@ sub PrintEditLinkPage {
 EOF
 }
 
-# PrintPropertiesPage
-#
-# Prints an HTML form in which the user can edit the properties of the
-# current page.
+=head2 PrintPropertiesPage
+
+Prints an HTML form in which the user can edit the properties of the
+current page.
+
+=cut
 
 sub PrintPropertiesPage {
   print <<EOF;
@@ -962,9 +1052,11 @@ EOF
 EOF
 }
 
-# DetermineTitle ($title,\%page)
-#
-# Determines properly-formatted title for the current page.
+=head2 DetermineTitle ($title,\%page)
+
+Determines properly-formatted title for the current page.
+
+=cut
 
 sub DetermineTitle {
   my ( $title, $pageref ) = @_;
@@ -974,9 +1066,11 @@ sub DetermineTitle {
   return $prettyTitle;
 }
 
-# PrintRenamePage
-#
-# Prints an HTML form in which the user can rename the current page.
+=head2 PrintRenamePage
+
+Prints an HTML form in which the user can rename the current page.
+
+=cut
 
 sub PrintRenamePage {
   print <<EOF;
@@ -997,15 +1091,17 @@ EOF
 
 }
 
-# -----------------
-# Input Subroutines
-# -----------------
+=head1 INPUT METHODS
 
-# GetCgiInput
-#
-# Fetches and decodes CGI information from the GET or POST method
-# and decodes it, storing the resulting name/value pairs in the
-# hash "Cgi".
+These methods handle the processing of the GET or POST data.
+
+=head2 GetCgiInput
+
+Fetches and decodes CGI information from the GET or POST method
+and decodes it, storing the resulting name/value pairs in the
+hash "Cgi".
+
+=cut
 
 sub GetCgiInput {
 
@@ -1045,19 +1141,19 @@ sub GetCgiInput {
   }
 }
 
-# -----------------------------
-# Database Handling Subroutines
-# -----------------------------
+=head1 DATABASE HANDLING METHODS
 
-# RequestLock
-#
-# Creates a lock directory to indicate exclusive access to the whole database.
-# This is different from access to a specific item, controlled by PageArchive's
-# locking mechanism. It is designed to serialize access to the database for
-# operations that could end up in trouble if a race condition occurred.
-#
-# Sleeps for up to 30 seconds if the lock exists, after which time it will
-# abort.
+=head2 RequestLock
+
+Creates a lock directory to indicate exclusive access to the whole database.
+This is different from access to a specific item, controlled by PageArchive's
+locking mechanism. It is designed to serialize access to the database for
+operations that could end up in trouble if a race condition occurred.
+
+Sleeps for up to 30 seconds if the lock exists, after which time it will
+abort.
+
+=cut
 
 sub RequestLock {
   my ($count) = 0;
@@ -1078,20 +1174,25 @@ sub RequestLock {
   note("Locking succeeeded after $count tries");
 }
 
-# ReleaseLock
-#
-# Frees exclusive access to the database by removing the lock
-# directory.
+=head2 ReleaseLock
+
+Frees exclusive access to the database by removing the lock
+directory.
+
+=head2
 
 sub ReleaseLock {
   rmdir($LockDir);
   note("Lock released");
 }
 
-# DefaultPage( page )
-#
-# ensure that all page fields are set to the default value
-# if they aren't already set; this avoids undefined values
+=head2 DefaultPage( page )
+
+Ensure that all page fields are set to the default value
+if they aren't already set; this avoids undefined values
+
+=cut
+
 sub DefaultPage {
   my $page = shift;
   my $create;
@@ -1141,10 +1242,13 @@ sub DefaultPage {
   return wantarray ? %{$page} : $page;
 }
 
-# RetrievePage( title, revision )
-#
-# Wrapper around PageArchive::get to ensure that all of the
-# page fields are there.  Prevents undefined access later...
+=head2 RetrievePage( title, revision )
+
+Wrapper around PageArchive::get to ensure that all of the
+page fields are there.  Prevents undefined access later...
+
+=cut
+
 sub RetrievePage {
   my ( $title, $revision ) = @_;
   my %page = $PageArchive->get( $title, $revision );
@@ -1156,11 +1260,13 @@ sub RetrievePage {
   %page = DefaultPage( \%page );
 }
 
-# GetPage
-#
-# Retrieves the page with the given title from the main database,
-# or from the page archive if a specific archive number is also
-# given.
+=head2 GetPage
+
+Retrieves the page with the given title from the main database,
+or from the page archive if a specific archive number is also
+given.
+
+=cut
 
 sub GetPage {
   my ( $title, $revision ) = @_;
@@ -1203,10 +1309,12 @@ sub GetPage {
   }
 }
 
-# AccessArchive
-#
-# Accesses the archived page whose name is passed as the argument.
-# Depends on the value of $Cgi{ar} to determine which version to fetch.
+=head2 AccessArchive
+
+Accesses the archived page whose name is passed as the argument.
+Depends on the value of $Cgi{ar} to determine which version to fetch.
+
+=cut
 
 sub AccessArchive {
   my ( %archive, %arpage );
@@ -1216,9 +1324,11 @@ sub AccessArchive {
   $page{Links}    = $arpage{Links};
 }
 
-# ArchiveCurrentPage
-#
-# Stores a copy of the current page in its archive file.
+=head2 ArchiveCurrentPage
+
+Stores a copy of the current page in its archive file.
+
+=cut
 
 sub ArchiveCurrentPage {
   my ( $title, $pageref ) = @_;
@@ -1229,10 +1339,12 @@ sub ArchiveCurrentPage {
   note("Requesting archival as $title,$page{Revision}");
 }
 
-# SaveCurrentPage
-#
-# Saves the local copy of the current page to the DBM
-# hash.
+=head2 SaveCurrentPage
+
+Saves the local copy of the current page to the DBM
+hash.
+
+=cut
 
 sub SaveCurrentPage {
 
@@ -1244,10 +1356,12 @@ sub SaveCurrentPage {
     and FatalError("Could not put page: $PageArchive->getError()");
 }
 
-# UpdateContents
-#
-# Uses information from the user to update the contents
-# of the current page.
+=head2 UpdateContents
+
+ Uses information from the user to update the contents
+ of the current page.
+
+=cut
 
 sub UpdateContents {
 
@@ -1281,10 +1395,12 @@ sub UpdateContents {
   &SaveCurrentPage;
 }
 
-# UpdateLinks
-#
-# Updates the local pages copy of the current external links
-# and saves the page.
+=head2 UpdateLinks
+
+Updates the local pages copy of the current external links
+and saves the page.
+
+=cut
 
 sub UpdateLinks {
   my (@list);
@@ -1302,10 +1418,12 @@ sub UpdateLinks {
   SaveCurrentPage;
 }
 
-# UpdateProperties
-#
-# Updates the current page's properties and saves it to the
-# DBM file.
+=head2 UpdateProperties
+
+Updates the current page's properties and saves it to the
+DBM file.
+
+=cut
 
 sub UpdateProperties {
 
@@ -1327,13 +1445,16 @@ sub UpdateProperties {
   &SaveCurrentPage;
 }
 
-# -------------------------
-# Main Handling Subroutines
-# -------------------------
+=head1 MAIN HANDLING METHODS
 
-# HandleSearch
-#
-# Shows results of a search.
+These methods process the received input for each page type
+and actually execute the requests.
+
+=head2 HandleSearch
+
+Shows results of a search.
+
+=cut
 
 sub HandleSearch {
 
@@ -1383,9 +1504,12 @@ sub HandleSearch {
   PrintHtmlFooter;
 }
 
-# HandleView
-#
-# Display a page, if possible.
+=head2 HandleView
+
+Display a page, if possible.
+
+=cut
+
 sub HandleView {
 
   # Get the title and fetch the page from the database.
@@ -1412,10 +1536,12 @@ sub HandleView {
   PrintHtmlFooter();
 }
 
-# HandleDiffs
-#
-# Show a "diffs" page between two versions of a page.
-#
+=head2 HandleDiffs
+
+Show a "diffs" page between two versions of a page.
+
+=cut
+
 sub HandleDiffs {
 
   # Get the title and fetch the page from the database.
@@ -1440,10 +1566,12 @@ sub HandleDiffs {
   PrintHtmlFooter();
 }
 
-# HighlightDiffs
-#
-# Show the differences on a word-by-word basis between an old and new
-# copy of a page.
+=head2 HighlightDiffs
+
+Show the differences on a word-by-word basis between an old and new
+copy of a page.
+
+=cut
 
 sub HighlightDiffs {
 
@@ -1502,9 +1630,12 @@ sub HighlightDiffs {
   $page{PageText} = join( '', @new );
 }
 
-# HandleLinks
-#
-# Edit the reference links in a page.
+=head2 HandleLinks
+
+Edit the reference links in a page.
+
+=cut
+
 sub HandleLinks {
   if ( ( $AnonAppendOnly or $BlockAnonUsers )
     and $CurrentUser eq "anonymous" ) {
@@ -1536,9 +1667,11 @@ sub HandleLinks {
   PrintHtmlFooter();
 }
 
-# HandleEditLink
-#
-# Edit an individual external link.
+=head2 HandleEditLink
+
+Edit an individual external link.
+
+=cut
 
 sub HandleEditLink {
 
@@ -1565,16 +1698,22 @@ sub HandleEditLink {
   }
 }
 
-# CuteThanks
-#
-# Show "Spot", the WebWeb mascot, in the thank-you page.
+=head2 CuteThanks
+
+Show "Spot", the WebWeb mascot, in the thank-you page.
+
+=cut
+
 sub CuteThanks {
   print "<img src=\"$IconUrl/thanks.gif\" alt=\"Thanks\"> <p>\n\n";
 }
 
-# HandleEdit
-#
-# Edit or append to a page.
+=head2 HandleEdit
+
+Edit or append to a page.
+
+=cut
+
 sub HandleEdit {
 
   # Get the title and fetch the page from the database.
@@ -1650,9 +1789,11 @@ sub HandleEdit {
   }
 }
 
-# SendNotification
-#
-# Send e-mail notifications to interested parties.
+=head2 SendNotification
+
+Send e-mail notifications to interested parties.
+
+=cut
 
 sub SendNotification {
   my (@mail) = split( $OtherSeparator, $page{MailNotify} );
@@ -1720,9 +1861,12 @@ EOF
   close(MAIL);
 }
 
-# HandleRestore
-#
-# Restore a page from the archives.
+=head2 HandleRestore
+
+Restore a page from the archives.
+
+=cut
+
 sub HandleRestore {
 
   # Get the page from the database so that we can check access.
@@ -1780,9 +1924,11 @@ EOF
   }
 }
 
-# HandlePurge
-#
-# Page processing for the "purge" form.
+=head2 HandlePurge
+
+Page processing for the "purge" form.
+
+=cut
 
 sub HandlePurge {
 
@@ -1820,9 +1966,12 @@ EOF
   }
 }
 
-# HandleGlobalPurge
-#
-# Page processing for the "global purge" form.
+=head2 HandleGlobalPurge
+
+Page processing for the "global purge" form.
+
+=cut
+
 sub HandleGlobalPurge {
 
   # User must be the administrator.
@@ -1867,9 +2016,11 @@ EOF
   }
 }
 
-# HandleInfo
-#
-# Display page ownership/control/update info.
+=head2 HandleInfo
+
+Display page ownership/control/update info.
+
+=cut
 
 sub HandleInfo {
   $title = $Cgi{PageInfo};
@@ -1963,9 +2114,11 @@ EOF
   PrintHtmlFooter();
 }
 
-# HandleProperties
-#
-# Process control for the properties update form.
+=head2 HandleProperties
+
+Process control for the properties update form.
+
+=cut
 
 sub HandleProperties {
   $title = $Cgi{PageProps};
@@ -1987,9 +2140,11 @@ sub HandleProperties {
   }
 }
 
-# HandleRename
-#
-# Process control for the "rename" form.
+=head2 HandleRename
+
+Process control for the "rename" form.
+
+=cut
 
 sub HandleRename {
   $title = $Cgi{RenamePage};
@@ -2046,9 +2201,11 @@ sub HandleRename {
   }
 }
 
-# ReplaceReferences
-#
-# Scan through the whole archive and replace all references to a page.
+=head2 ReplaceReferences
+
+Scan through the whole archive and replace all references to a page.
+
+=cut
 
 sub ReplaceReferences {
   my ($new) = $Cgi{new};
@@ -2072,17 +2229,22 @@ sub ReplaceReferences {
   return ( $m == 1 ? "1 page" : "$m pages" ) . " out of $n";
 }
 
-# DeletePage
-#
-# Delete a single page from the archive.
+=head2 DeletePage
+
+Delete a single page from the archive.
+
+=cut
 
 sub DeletePage {
   $PageArchive->delete($title);
 }
 
-# HandleDelete
-#
-# Process control for the "delete" form.
+=head2 HandleDelete
+
+Process control for the "delete" form.
+
+=cut
+
 sub HandleDelete {
 
   # Get the title of the page and fetch from the database.
@@ -2126,10 +2288,13 @@ EOF
   }
 }
 
-# HandleMail
-#
-# Process control for the form that adds/removes a user from the notification
-# list.
+=head2 HandleMail
+
+Process control for the form that adds/removes a user from the notification
+list.
+
+=cut
+
 sub HandleMail {
   if ( $CurrentUser eq "anonymous" ) {
     FatalError( "Anonymous users are not allowed to set mail "
@@ -2197,9 +2362,12 @@ EOF
   }
 }
 
-# HandleEditMail
-#
-# Handles the form that accepts and saves a user's email address.
+=head2 HandleEditMail
+
+Handles the form that accepts and saves a user's email address.
+
+=cut
+
 sub HandleEditMail {
   FatalError( "Anonymous users may not specify a mail address.<br>"
       . "Please log in first." )
@@ -2240,10 +2408,13 @@ EOF
   }
 }
 
-# HandleRecentChanges
-#
-# Scans the archive and displays a page showing the most recently-updated
-# pages (up to the limit set by the administrator).
+=head2 HandleRecentChanges
+
+Scans the archive and displays a page showing the most recently-updated
+pages (up to the limit set by the administrator).
+
+=cut
+
 sub HandleRecentChanges {
   my ( $count, %times );
 
@@ -2313,13 +2484,17 @@ sub HandleRecentChanges {
   PrintHtmlFooter();
 }
 
-# --------------------------
-# Administration Subroutines
-# --------------------------
+=head1 ADMINISTRATION METHODS
 
-# GetAdminInfo
-#
-# Load the admin info. Force it to be created if there is none.
+These methods handle all of the administrator commands.
+
+=cut
+
+=head2 GetAdminInfo
+
+Load the admin info. Force it to be created if there is none.
+
+=cut
 
 sub GetAdminInfo {
 
@@ -2355,9 +2530,11 @@ sub GetAdminInfo {
   }
 }
 
-# UserPWChange
-#
-# Allow users to change their passwords.
+=head2 UserPWChange
+
+Allow users to change their passwords.
+
+=cut
 
 sub UserPWChange {
   if ( $ENV{REQUEST_METHOD} eq "GET" ) {
@@ -2481,9 +2658,12 @@ EOF
 
 }
 
-# ManageUsers
-#
-# Add or remove users, reset passwords.
+=head2 ManageUsers
+
+Add or remove users, reset passwords.
+
+=cut
+
 sub ManageUsers {
 
   # Check that the user is allowed to edit the password file.
@@ -2723,9 +2903,11 @@ EOF
 
 }
 
-# EditAdminRecord
-#
-# Create or update the admin data.
+=head2 EditAdminRecord
+
+Create or update the admin data.
+
+=cut
 
 sub EditAdminRecord {
   my %rec = $PageArchive->get( $AdminRec, 0 );
@@ -2870,9 +3052,11 @@ EOF
   }
 }
 
-# UnlockFile
-#
-# Allows a user to break the lock on a file that was being edited.
+=head2 UnlockFile
+
+Allows a user to break the lock on a file that was being edited.
+
+=cut
 
 sub UnlockFile {
 
@@ -2949,9 +3133,11 @@ EOF
   note("unlock complete");
 }
 
-# do_unlock (page)
-#
-# Unlocks the page if possible.
+=head2 do_unlock (page)
+
+ Unlocks the page if possible.
+
+=cut
 
 sub do_unlock {
   my $discard_this;
@@ -2976,13 +3162,16 @@ sub do_unlock {
   ReShow( $target, "$target was updated successfully." );
 }
 
-# --------------------------
-# Access Subroutines
-# --------------------------
+=head1 ACCESS METHODS
 
-# CheckAccess (acl)
-#
-# Determine if the current ACL allows a user to access a page.
+Process the access control stuff.
+
+=head2 CheckAccess (acl)
+
+Determine if the current ACL allows a user to access a page.
+
+=cut
+
 sub CheckAccess {
   my ($acl) = @_;
   my ( $users, $pages, @pages );
@@ -3019,9 +3208,12 @@ sub CheckAccess {
   }
 }
 
-# GetAccessVars
-#
-# Set the global access levels for further checking.
+=head2 GetAccessVars
+
+Set the global access levels for further checking.
+
+=cut
+
 sub GetAccessVars {
 
   # Determine if this is an anonymous user and should be blocked.
@@ -3042,10 +3234,12 @@ sub GetAccessVars {
   $ReadAccess = "true" if $EditAccess;
 }
 
-# InheritProperties
-#
-# Handle the process of getting the parent page's properties and giving them
-# to the current (new) page.
+=head2 InheritProperties
+
+Handle the process of getting the parent page's properties and giving them
+to the current (new) page.
+
+=cut
 
 sub InheritProperties {
 
@@ -3071,13 +3265,14 @@ sub InheritProperties {
   }
 }
 
-#----------------------
-# Internal utility routines.
-#----------------------
+=head1 INTERNAL UTILITY ROUTINES
 
-# note
-#
-# Add a message to the debug log.
+=head2 note
+
+Add a message to the debug log.
+
+=cut
+
 sub note {
   my $now   = scalar localtime(time);
   my $space = " " x ( 1 + length($now) );
@@ -3089,13 +3284,15 @@ sub note {
 # XXX: These two functions need to be handled in a better way.
 #      Leaving them here for the moment, but they should be replaced soon.
 
-# load_global( mode, hash_ref, array_ref )
-#
-# assign values to global variables with values from hash,
-# keyed off of global variable names.  uses array of variable
-# names for precise control.  if mode is 0, non-existant hash
-# entries will not affect the global variables.  if mode is 1
-# the corresponding entries will be set to undef.
+=head2 load_global( mode, hash_ref, array_ref )
+
+Assign values to global variables with values from hash,
+keyed off of global variable names.  uses array of variable
+names for precise control.  if mode is 0, non-existant hash
+entries will not affect the global variables.  if mode is 1
+the corresponding entries will be set to undef.
+
+=cut
 
 sub load_global {
   my ( $mode, $h, $k ) = @_;
@@ -3110,11 +3307,14 @@ sub load_global {
   eval join( ';', @c ); ## no critic qw(BuiltinFunctions::ProhibitStringyEval)
 }
 
-# store_global( hash_ref, array_ref )
-#
-# store values of global variables in hash,
-# keyed off of global variable names.  uses array of variable
-# names for precise control.
+=head2 store_global( hash_ref, array_ref )
+
+Store values of global variables in hash,
+keyed off of global variable names. Uses array of variable
+names for precise control.
+
+=cut
+
 sub store_global {
   my ( $h, @k ) = @_;
   my @c;
@@ -3124,13 +3324,23 @@ sub store_global {
   eval join( ';', @c ); ## no critic qw(BuiltinFunctions::ProhibitStringyEval)
 }
 
-# Cleanup
-# Force cleanup of PageArchive object.
+=head2 Cleanup
+
+Force cleanup of PageArchive object.
+
+=cut
+
 sub Cleanup {
 
   # implicitly call PageArchive->DESTROY, closing archive handle.
   $PageArchive = undef;
 }
+
+=head2 main
+
+Actually runs the whole show.
+
+=cut
 
 sub main {
   _setup_kludge();
