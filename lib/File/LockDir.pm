@@ -85,16 +85,20 @@ sub new {
 
     $self->locked_files({});
 
-    # If a log function was supplied, use it. Otherwise, print
+    # If a valid log function was supplied, use it. Otherwise, print
     # log/debug messages to STDERR.
-    die "logger is not a code ref" unless ref $params{logger} eq "CODE";
-    $self->{_notesub} = ($params{logger} || sub { print STDERR @_ });
+    if (defined $params{logger}) {
+      die "logger is not a code ref" unless ref $params{logger} eq "CODE";
+    }
+    $self->{_notesub} = $params{logger} ? $params{logger} : sub { print STDERR @_ };
 
-    # If a fatal function was supplied, use it. Else, use croak instead.
-    die "fatal is not a code ref" unless ref $params{fatal} eq "CODE";
-    $self->{_fatalsub} = ($params{fatal}  || sub { croak @_ });
+    # If a valid fatal function was supplied, use it. Else, use croak instead.
+    if (defined $params{fatal}) {
+      die "fatal is not a code ref" unless ref $params{fatal} eq "CODE";
+    }
+    $self->{_fatalsub} = $params{fatal} ? $params{fatal} : sub { croak @_ };
 
-    $self->{_debug} = 1 if $params{debug} || 0;
+    $self->{_debug} = $params{debug} ? 1 : 0;
     $self->{_sleep_seconds} = +$params{sleep} || DEFAULT_SLEEP_TIME;
 
     return $self;
@@ -108,7 +112,8 @@ Sends its arguments to the note callback.
 
 sub note {
   my($self, @args) = @_;
-  &{$self->{_notesub}}->(@args);
+  my $callback = $self->{_notesub};
+  $callback->(@args);
 }
 
 =head2 fatal
@@ -119,7 +124,8 @@ Sends its argumetns to the fatal callback.
 
 sub fatal {
   my($self, @args) = @_;
-  &{$self->{_fatalsub}}->(@args);
+  my $callback = $self->{_fatalsub};
+  $callback->(@args);
 }
 
 =head1 INSTANCE METHODS
@@ -152,6 +158,28 @@ sub locked_files {
   }
 
   return;
+}
+
+=head2 sleep
+
+Getter for the sleep interval.
+
+=cut
+
+sub sleep {
+  my($self) = @_;
+  return $self->{_sleep_seconds};
+}
+
+=head3 debug
+
+Getter for the debug flag.
+
+=cut
+
+sub debug {
+  my($self) = @_;
+  return $self->{_debug};
 }
 
 =head2 nflock($path, $delay, $locking_user, $hostname)
@@ -231,7 +259,7 @@ sub nflock {
 
     # If debugging, show us who has the lock now.
   DEBUG:
-    if ( $self->{_debug} ) {
+    if ( $self->debug ) {
 
       # If we can't open the "who owns this" file, don't try the
       # rest of this block.
@@ -248,7 +276,7 @@ sub nflock {
 
     # Wait a bit to see if we can get it. If we've used up our
     # time, fetch the current lock info and return it.
-    sleep $self->{_sleep_seconds};
+    CORE::sleep $self->sleep;
     if ( $naptime && time > $start + $naptime ) {
       my $lockee = _read_lock_info($whos_got);
       return ( undef, $lockee );
@@ -287,7 +315,7 @@ sub nfunlock {
   my $lockname = _name2lock($pathname);
   my $whos_got = "$lockname/owner";
   unlink($whos_got);
-  $self->note("releasing lock on $lockname") if $self->{_debug};
+  $self->note("releasing lock on $lockname") if $self->debug;
   $self->delete_lock_for($pathname);
   delete $Locked_Files{$pathname};
   return rmdir($lockname);
