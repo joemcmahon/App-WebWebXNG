@@ -230,24 +230,24 @@ Dies if the file cannot be locked.
 # usage: nflock(FILE; NAPTILL; LOCKER; LOCKHOST)
 sub nflock {
   my ( $self, $pathname, $naptime, $locker, $lockhost ) = @_;
-  defined $pathname or die "no pathname supplied";
+  defined $pathname or croak "no pathname supplied";
   defined $naptime  or $naptime  = 0;
   defined $locker   or $locker   = "anonymous";
   defined $lockhost or $lockhost = hostname();
 
   my $lockname = _name2lock($pathname);
-  my $whos_got = "$lockname/owner";
+  my $whos_got = File::Spec->catfile($lockname,"owner");
   my $start    = time();
   my $missed   = 0;
 
-  # if locking what I've already locked, return
-  if ( $self->locked_files($pathname) ) {
+  # if in the locked file cache, return the contents
+  if ( my $owner = $self->locked_files($pathname) ) {
     $self->note("$pathname already locked");
-    return 1;
+    return (1, $owner);
   }
 
-  if ( !-w dirname($pathname) ) {
-    $self->fatal("can't write to directory of $pathname");
+  if ( !-w $lockname ) {
+    $self->fatal("can't write to lockfile $lockname");
   }
 
   # Keep trying to get the lock until we give up.
@@ -287,9 +287,10 @@ sub nflock {
 
   # We were able to create the lock directory, so we have possession
   # of the lock. Write the locker info out and return success.
-  sysopen( my $owner, ">", $whos_got, O_WRONLY | O_CREAT | O_EXCL )
+  sysopen( my $owner, $whos_got, O_WRONLY | O_CREAT | O_EXCL )
     or $self->fatal("can't create $whos_got $!");
   my $locktime = scalar( localtime() );
+  chomp $locktime;
   my $line = sprintf( "%s from %s since %s\n", $locker, $lockhost, $locktime );
   print $owner $line;
   close($owner)
