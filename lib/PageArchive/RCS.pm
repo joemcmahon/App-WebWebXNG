@@ -389,6 +389,7 @@ Fetch last error that occurred.
 =cut
 
 sub getError {
+    my($self) = @_;
     return $self->{ErrorMsg};
 }
 
