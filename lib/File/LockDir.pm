@@ -189,7 +189,7 @@ sub nflock {
   defined $locker   or $locker   = "anonymous";
   defined $lockhost or $lockhost = hostname();
 
-  my $lockname = name2lock($pathname);
+  my $lockname = _name2lock($pathname);
   my $whos_got = "$lockname/owner";
   my $start    = time();
   my $missed   = 0;
@@ -252,7 +252,7 @@ sub nflock {
   return ( 1, undef );
 }
 
-=head2 nfunlock($pathnane)
+=head2 nunflock($pathnane)
 
 Unlocks the supplied path by removing the lock data file and then
 removing the lock directory (again, an atomic operation on NFS).
@@ -266,8 +266,9 @@ removing the lock directory (again, an atomic operation on NFS).
 =cut
 
 sub nunflock {
-  my $pathname = shift;
-  my $lockname = name2lock($pathname);
+  my($self, $pathname) = @_;
+  croak "No pathname passed to nunflock" unless defined $pathname;
+  my $lockname = _name2lock($pathname);
   my $whos_got = "$lockname/owner";
   unlink($whos_got);
   $self->note("releasing lock on $lockname") if $self->{_debug};
@@ -288,9 +289,10 @@ Checks lock state for the given path.
 =cut
 
 # check the state of the lock, bu don't try to get it
-sub nlock_state($) {
-  my $pathname  = shift;
-  my $lockname  = name2lock($pathname);
+sub nlock_state {
+  my($self, $pathname) = @_;
+  croak "No pathname supplied to nlock_state" unless defined $pathname;
+  my $lockname  = _name2lock($pathname);
   my $whos_got  = "$lockname/owner";
   my $is_locked = $self->_locked_files($pathname);
   return ( undef, $Locked_Files{$pathname} ) if $is_locked;
@@ -302,7 +304,7 @@ sub nlock_state($) {
 }
 
 # helper functions
-sub name2lock {
+sub _name2lock {
   my $pathname = shift;
   my $dir      = dirname($pathname);
   my $file     = basename($pathname);
@@ -314,7 +316,7 @@ sub name2lock {
 sub _read_lock_info {
   my ($whos_got) = @_;
   open( my $owner, "<", $whos_got ) || last;    # exit "if"!
-  $lockee = <$owner>;
+  my $lockee = <$owner>;
   close $owner;
   chomp($lockee);
   return $lockee;
