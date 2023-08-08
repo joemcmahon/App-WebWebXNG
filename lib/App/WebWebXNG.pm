@@ -137,13 +137,13 @@ use Carp;
 use Storable;
 use PageArchive::RCS;
 use Sys::Hostname;
-use PasswordManager;
+use App::WebWebXNG:AuthManager;
 
 $SIG{TERM} = sub {
   FatalError("Premature termination, see error log");
 };
 
-sub setup_kludge {
+sub _setup_kludge {
 
   # Change this to the nameof the server where you're running WebWebX.
   $SERVER = "prtims.stx.com";
@@ -195,9 +195,6 @@ sub setup_kludge {
 #      generalized notification interface and then let people plug in what they want.
   $MailProgram = "/usr/lib/sendmail";
 }
-
-sub main {
-  setup_kludge();
 
   # ----------------
   # HTML Subroutines
@@ -3145,12 +3142,15 @@ EOF
     $PageArchive = undef;
   }
 
+sub main {
+  _setup_kludge();
+
   #----------------------
   # Initialization.
   #----------------------
   # Blow up if password file is unusable
   if ($PasswordFile) {
-    $UserAdmin = new PasswordManager($PasswordFile);
+    $UserAdmin = App::WebWebXNG:AuthManager->new($PasswordFile);
     my $why = $UserAdmin->unusable;
     FatalError($why) if $why;
   }
