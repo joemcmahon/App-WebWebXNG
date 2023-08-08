@@ -247,7 +247,7 @@ sub put {
     my $handle;
     unless(open($handle, ">", "$target")) {
         $self->setError("Cannot write to $target: $!");
-        return undef;
+        return;
     }
 
     # Flatten and store.
@@ -283,7 +283,7 @@ sub delete {
     # Report an error if the version doesn't exist.
     unless ($self->defined($name,$version)) {
         $self->setError("$self->{DirName}/$name,$version does not exist");
-        return undef;
+        return;
     }
 
     # Do it.
