@@ -54,7 +54,7 @@ sub new {
   $self->logger( $params{Logger} || sub { print STDERR @_ } );
   $self->fatal( $params{Fatal}   || sub { croak @_ } );
 
-  $self->setError();
+  $self->set_error();
 
   # Verify that dir name is OK; try to create it if we must;
   # return undef if we can't.
@@ -203,10 +203,10 @@ sub get {
   $version = $self->max_version($name) unless $version;
 
   $self->logger->("Getting $name,$version");
-  $self->setError();
+  $self->set_error();
 
   unless ( $self->defined( $name, $version ) ) {
-    $self->setError("$self->{DirName}/$name,$version does not exist");
+    $self->set_error("$self->{DirName}/$name,$version does not exist");
     return;
   }
 
@@ -214,7 +214,7 @@ sub get {
   my $handle;
   unless (
     open( $handle, "<", $self->{DirName} . "/" . $name . "," . $version ) ) {
-    $self->setError("Unreadable file $self->{DirName}/$name,$version: $!");
+    $self->set_error("Unreadable file $self->{DirName}/$name,$version: $!");
     return;
   }
 
@@ -244,13 +244,13 @@ sub put {
     $version += 0;    # Force to numeric
   }
 
-  $self->setError();
+  $self->set_error();
 
   # Open the file, if we can.
   my $target = "$self->{DirName}/$name,$version";
   my $handle;
   unless ( open( $handle, ">", "$target" ) ) {
-    $self->setError("Cannot write to $target: $!");
+    $self->set_error("Cannot write to $target: $!");
     return;
   }
 
@@ -285,12 +285,12 @@ sub delete {
 
   # Report an error if the version doesn't exist.
   unless ( $self->defined( $name, $version ) ) {
-    $self->setError("$self->{DirName}/$name,$version does not exist");
+    $self->set_error("$self->{DirName}/$name,$version does not exist");
     return;
   }
 
   # Do it.
-  $self->setError();
+  $self->set_error();
   my $file = "$self->{DirName}/$name,$version";
   unlink $file if ( -e $file );
 }
