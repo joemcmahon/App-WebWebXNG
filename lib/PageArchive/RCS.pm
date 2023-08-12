@@ -78,7 +78,14 @@ sub new {
   } else {    # is a directory (and exists)
     $self->{DirName}   = $dirname;
     $self->{LockLimit} = 30;
-  }
+    # See if we can read the directory; die if not.
+      my $h;
+      if (not opendir( $h, $dirname ) ) {
+        $self->fatal->("Cannot open $dirname: $!");
+      } else {
+        $self->_archive_handle($h);
+      }
+ }
 
   # Initialize File::LockDir.
   $self->_locker(
@@ -88,10 +95,6 @@ sub new {
     )
   );
 
-  # See if we can read the directory; return undef if not.
-  unless ( opendir( $self->{Handle}, $dirname ) ) {
-    $self->fatal->("Cannot open $dirname: $!");
-  }
   return $self;
 }
 
@@ -103,7 +106,7 @@ Clean up and shut down
 
 sub DESTROY {
   my $self = shift;
-  closedir $self->{Handle} if defined $self->{Handle};
+  closedir $self->_archive_handle if defined $self->_archive_handle;
 }
 
 =head1 INSTANCE METHODS
@@ -124,7 +127,7 @@ sub defined {
   # Search directory for filenames matching.
   $self->dh_reset;
   $self->{Rewound} = 0;
-  return grep( /^$name,$version/, readdir $self->{Handle} );
+  return grep( /^$name,$version/, readdir $self->_archive_handle );
 }
 
 =head2 lock($name)
@@ -303,14 +306,14 @@ sub purge {
   my ( $self, $name ) = @_;
 
   # Rewind so we see all the files.
-  $self->setError();
+  $self->set_error();
   $self->dh_reset or return 0;
 
   # Note fancy implied loop done by map. readdir() is evaluated in list
   # context, so it returns all names in the directory.
   map unlink( $self->{DirName} . "/" . $_ ),    # remove files ...
     grep( /^$name,/,                            # ... matching this ...
-    readdir $self->{Handle} );                  # ... in list of files in dir
+    readdir $self->_archive_handle );           # ... in list of files in dir
   $self->{Rewound} = 0;
   return 1;
 }
@@ -325,10 +328,10 @@ sub iterator {
   my ($self) = shift;
 
   # Get list of all names.
-  $self->setError();
+  $self->set_error();
   $self->dh_reset or return;    # undefined value
 
-  my (@names) = readdir $self->{Handle};
+  my (@names) = readdir $self->_archive_handle;
   $self->{Rewound} = 0;
 
   # Scan through names, returning highest-numbered version for each.
@@ -374,26 +377,40 @@ sub fatal {
   $self->{_fatal};
 }
 
-=head2 setError($msg, $msg, $msg ...)
+=head2 _archive_handle
+
+Dirhandle pointing to the page archive. This method is
+privaet because callers should not be trying to directly
+access the archive.
+
+=cut
+
+sub _archive_handle {
+  my ($self, $handle) = @_;
+  $self->{Handle} = $handle if defined $handle;
+  $self->{Handle};
+}
+
+=head2 set_error($msg, $msg, $msg ...)
 
 Global error message capture for this instance
 
 =cut
 
-sub setError {
+sub set_error {
   my ($self) = shift;
   $self->{ErrorMsg} = join( " ", @_ );
   $self->logger->( $self->{ErrorMsg} ) if int @_;
   return 1;
 }
 
-=head2  getError()
+=head2  get_error()
 
 Fetch last error that occurred.
 
 =cut
 
-sub getError {
+sub get_error {
   my ($self) = @_;
   return $self->{ErrorMsg};
 }
@@ -424,11 +441,11 @@ sub dh_reset {
   my $success = 1;
 
   if ( $^O eq 'MSWin32' ) {
-    closedir( $self->{Handle} );
-    opendir( $self->{Handle}, $self->{DirName} )
+    closedir( $self->_archive_handle );
+    opendir( $self->_archive_handle, $self->{DirName} )
       or $success = 0;
   } else {
-    rewinddir $self->{Handle};
+    rewinddir $self->_archive_handle;
   }
   $success;
 }
