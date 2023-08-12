@@ -27,6 +27,8 @@ use Storable;
 use File::LockDir;
 use Data::Dumper;
 
+use constant DEFAULT_LOCK_LIMIT => 30;
+
 =head1 CLASS METHODS
 
 =head2 new
@@ -76,8 +78,9 @@ sub new {
       $self->fatal->("$dirname exists, but is not a directory");
     }
   } else {    # is a directory (and exists)
-    $self->{DirName}   = $dirname;
-    $self->{LockLimit} = 30;
+    $self->_dirname($dirname);
+    $self->lock_limit(DEFAULT_LOCK_LIMIT);
+
     # See if we can read the directory; die if not.
       my $h;
       if (not opendir( $h, $dirname ) ) {
@@ -141,8 +144,11 @@ Returns undef if the entry can't be locked, true otherwise.
 sub lock {
   my ( $self, $name, $who, $host ) = @_;
   my ( $which, $locked_by ) =
-    $self->locker->nflock( "$self->{DirName}/$name", $self->lock_limit(), $who,
-    $host );
+    $self->locker->nflock(
+      $self->_page_in_archive($name),
+      $self->lock_limit(),
+      $who,
+      $host );
   return ( $which, $locked_by );
 }
 
@@ -156,7 +162,7 @@ Returns undef if the entry wasn't locked, true otherwise.
 
 sub unlock {
   my ( $self, $name ) = @_;
-  $self->locker->nfunlock("$self->{DirName}/$name");
+  $self->locker->nfunlock($self->_page_in_archive($name));
 }
 
 =head2 is_unlocked($name)
@@ -170,7 +176,7 @@ Returns: (1, undef) if the entry is unlocked
 
 sub is_unlocked {
   my ( $self, $name ) = @_;
-  return $self->locker->nlock_state("$self->{DirName}/$name");
+  return $self->locker->nlock_state($self->_page_in_archive($name));
 }
 
 =head2 max_version($name)
@@ -209,15 +215,15 @@ sub get {
   $self->set_error();
 
   unless ( $self->defined( $name, $version ) ) {
-    $self->set_error("$self->{DirName}/$name,$version does not exist");
+    $self->set_error($self->_page_in_archive . ",$version does not exist");
     return;
   }
 
   # This shouldn't happen, unless someone's been fiddling with the database.
   my $handle;
-  unless (
-    open( $handle, "<", $self->{DirName} . "/" . $name . "," . $version ) ) {
-    $self->set_error("Unreadable file $self->{DirName}/$name,$version: $!");
+  my $pagefile = $self->_page_in_archive($name, $version);
+  unless ( open($handle, "<", $pagefile) ) {
+    $self->set_error("Unreadable file $pagefile: $!");
     return;
   }
 
@@ -250,7 +256,7 @@ sub put {
   $self->set_error();
 
   # Open the file, if we can.
-  my $target = "$self->{DirName}/$name,$version";
+  my $target = $self->_page_in_archive($name, $version);
   my $handle;
   unless ( open( $handle, ">", "$target" ) ) {
     $self->set_error("Cannot write to $target: $!");
@@ -288,14 +294,15 @@ sub delete {
 
   # Report an error if the version doesn't exist.
   unless ( $self->defined( $name, $version ) ) {
-    $self->set_error("$self->{DirName}/$name,$version does not exist");
+    my $pagefile = $self->_page_in_archive($name, $version);
+    $self->set_error("$pagefile does not exist");
     return;
   }
 
   # Do it.
   $self->set_error();
-  my $file = "$self->{DirName}/$name,$version";
-  unlink $file if ( -e $file );
+  my $pagefile = $self->_page_in_archive($name, $version);
+  unlink $pagefile if ( -e $pagefile );
 }
 
 =head2 purge($title) - remove all versions of an entry
@@ -311,7 +318,7 @@ sub purge {
 
   # Note fancy implied loop done by map. readdir() is evaluated in list
   # context, so it returns all names in the directory.
-  map unlink( $self->{DirName} . "/" . $_ ),    # remove files ...
+  map unlink( $self->_dirname . "/" . $_ ),    # remove files ...
     grep( /^$name,/,                            # ... matching this ...
     readdir $self->_archive_handle );           # ... in list of files in dir
   $self->{Rewound} = 0;
@@ -442,12 +449,25 @@ sub dh_reset {
 
   if ( $^O eq 'MSWin32' ) {
     closedir( $self->_archive_handle );
-    opendir( $self->_archive_handle, $self->{DirName} )
+    opendir( $self->_archive_handle, $self->_dirname )
       or $success = 0;
   } else {
     rewinddir $self->_archive_handle;
   }
   $success;
+}
+
+sub _page_in_archive {
+  my ($self, $page_name, $version) = @_;
+  my $f = File::Spec->catdir($self->dirname, $page_name);
+  $f = "$f,$version" if defined $version;
+  return $f;
+}
+
+sub _dirname {
+  my($self, $name) = @_;
+  $self->{_dirname} = $name if defined $name;
+  $self->{_dirname};
 }
 
 sub _locker {
