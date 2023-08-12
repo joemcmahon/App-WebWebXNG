@@ -114,7 +114,7 @@ sub DESTROY {
 
 =head1 INSTANCE METHODS
 
-=head2 defined($name, $version)
+=head2 page_exists($name, $version)
 
 Determine whether or not an entry exists.
 
@@ -123,13 +123,13 @@ versions exist.
 
 =cut
 
-sub defined {
+sub page_exists {
   my ( $self, $name, $version ) = @_;
   $version = "" unless defined $version;
 
   # Search directory for filenames matching.
-  $self->dh_reset;
-  $self->{Rewound} = 0;
+  $self->rewind;
+  $self->_rewound(0);
   return grep( /^$name,$version/, readdir $self->_archive_handle );
 }
 
@@ -187,7 +187,7 @@ Returns the version number of the newest version.
 
 sub max_version {
     my($self, $name) = @_;
-    $self->dh_reset;
+    $self->rewind;
 
    # We use defined() to get a list of versions defined for this name, use
    # map() to strip off just the versions, sort these numerically in reverse,
@@ -214,7 +214,7 @@ sub get {
   $self->logger->("Getting $name,$version");
   $self->set_error();
 
-  unless ( $self->defined( $name, $version ) ) {
+  unless ( $self->page_exists( $name, $version ) ) {
     $self->set_error($self->_page_in_archive . ",$version does not exist");
     return;
   }
@@ -293,7 +293,7 @@ sub delete {
   }
 
   # Report an error if the version doesn't exist.
-  unless ( $self->defined( $name, $version ) ) {
+  unless ( $self->page_exists( $name, $version ) ) {
     my $pagefile = $self->_page_in_archive($name, $version);
     $self->set_error("$pagefile does not exist");
     return;
@@ -314,14 +314,14 @@ sub purge {
 
   # Rewind so we see all the files.
   $self->set_error();
-  $self->dh_reset or return 0;
+  $self->rewind or return 0;
 
   # Note fancy implied loop done by map. readdir() is evaluated in list
   # context, so it returns all names in the directory.
   map unlink( $self->_dirname . "/" . $_ ),    # remove files ...
     grep( /^$name,/,                            # ... matching this ...
     readdir $self->_archive_handle );           # ... in list of files in dir
-  $self->{Rewound} = 0;
+  $self->_rewound(0);
   return 1;
 }
 
@@ -336,10 +336,10 @@ sub iterator {
 
   # Get list of all names.
   $self->set_error();
-  $self->dh_reset or return;    # undefined value
+  $self->rewind or return;    # undefined value
 
   my (@names) = readdir $self->_archive_handle;
-  $self->{Rewound} = 0;
+  $self->_rewound(0);
 
   # Scan through names, returning highest-numbered version for each.
   my %highest = ();
@@ -434,7 +434,7 @@ sub lock_limit {
   $self->{LockLimit};
 }
 
-=head2 dh_reset
+=head2 rewind
 
 "Rewind" the directory handle as appropriate. Required for proper
 operation under Win32 Perl.
@@ -443,7 +443,7 @@ Returns true if success or false if failure.
 
 =cut
 
-sub dh_reset {
+sub rewind {
   my $self    = shift;
   my $success = 1;
 
@@ -468,6 +468,12 @@ sub _dirname {
   my($self, $name) = @_;
   $self->{_dirname} = $name if defined $name;
   $self->{_dirname};
+}
+
+sub _rewound {
+  my ($self, $state) = @_;
+  $self->{_rewound} if defined $state;
+  $self->{_rewound};
 }
 
 sub _locker {
