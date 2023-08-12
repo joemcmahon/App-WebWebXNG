@@ -19,4 +19,7 @@ ok $archive, "got an object";
 ok defined $archive->{_logger}, "default logger installed";
 ok defined $archive->{_fatal},  "defailt fatal installed";
 
+ok !$archive->get_error, 'no error when started up';
+ok $archive->_archive_handle, 'we got an archive handle';
+
 done_testing;
