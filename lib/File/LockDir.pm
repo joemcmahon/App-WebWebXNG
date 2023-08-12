@@ -95,43 +95,43 @@ sub new {
     if (defined $params{logger}) {
       croak "logger is not a code ref" unless ref $params{logger} eq "CODE";
     }
-    $self->{_notesub} = $params{logger} ? $params{logger} : sub { warn @_, "\n" };
+    $self->note($params{logger} ? $params{logger} : sub { carp @_ });
 
     # If a valid fatal function was supplied, use it. Else, use croak instead.
     if (defined $params{fatal}) {
       croak "fatal is not a code ref" unless ref $params{fatal} eq "CODE";
     }
-    $self->{_fatalsub} = $params{fatal} ? $params{fatal} : sub { croak @_ };
+    $self->fatal($params{fatal} ? $params{fatal} : sub { croak @_ });
 
-    $self->{_debug} = $params{debug} ? 1 : 0;
-    $self->{_sleep_seconds} = +$params{sleep} || DEFAULT_SLEEP_TIME;
-    $self->{_tries} = +$params{tries} || DEFAULT_TRIES;
+    $self->debug($params{debug} ? 1 : 0);
+    $self->sleep(+$params{sleep} || DEFAULT_SLEEP_TIME);
+    $self->tries(+$params{tries} || DEFAULT_TRIES);
 
     return $self;
 }
 
 =head2 note(@args)
 
-Sends its arguments to the note callback.
+Setter/getter for the note callback.
 
 =cut
 
 sub note {
-  my($self, @args) = @_;
-  my $callback = $self->{_notesub};
-  $callback->(@args);
+  my($self, $callback) = @_;
+  $self->{_note} = $callback if defined $callback;
+  $self->{_note};
 }
 
 =head2 fatal
 
-Sends its arguments to the fatal callback.
+Setter/getter for the fatal callback.
 
 =cut
 
 sub fatal {
-  my($self, @args) = @_;
-  my $callback = $self->{_fatalsub};
-  $callback->(@args);
+  my($self, $callback) = @_;
+  $self->{_fatal} = $callback if defined $callback;
+  $self->{_fatal};
 }
 
 =head1 INSTANCE METHODS
@@ -169,34 +169,37 @@ sub locked_files {
 
 =head2 sleep
 
-Getter for the sleep interval.
+Setter/getter for the sleep interval.
 
 =cut
 
 sub sleep {
-  my($self) = @_;
+  my($self, $interval) = @_;
+  $self->{_sleep_seconds} = $interval if defined $interval;
   return $self->{_sleep_seconds};
 }
 
 =head3 debug
 
-Getter for the debug flag.
+Setter/getter for the debug flag.
 
 =cut
 
 sub debug {
-  my($self) = @_;
+  my($self, $setting) = @_;
+  $self->{_debug} = $setting if defined $setting;
   return $self->{_debug};
 }
 
 =head3 tries
 
-Getter for the try count.
+Setter/getter for the try count.
 
 =cut
 
 sub tries {
-  my ($self) = @_;
+  my ($self, $count) = @_;
+  $self->{_tries} = $count if defined $count;
   return $self->{_tries};
 }
 
@@ -257,17 +260,17 @@ sub nflock {
 
   # if in the locked file cache, return the contents
   if ( my $owner = $self->locked_files($pathname) ) {
-    $self->note("$pathname already locked");
+    $self->note->("$pathname already locked");
     return (1, $owner);
   }
 
   # Stay in this block until we either successfully create the
   # lock directory, we run out of tries, or we time out.
   my $tries_left = $self->tries;
-  $self->note("lock $pathname: attempt to obtain lock");
+  $self->note->("lock $pathname: attempt to obtain lock");
 SPIN:
   while (1) {
-    $self->note("lock $pathname: try $tries_left") if $self->debug;
+    $self->note->("lock $pathname: try $tries_left") if $self->debug;
     $tries_left--;
 
     # If the mkdir succeeds, we have control and can lock.
@@ -280,11 +283,11 @@ SPIN:
     # but it's possible -- then the mkdir will fail until we
     # reach the timeout and then we'll return a lock fail.
     last if mkdir( $lockname, 0700 );
-    $self->note("lock $pathname: did not get lock") if $self->debug;
+    $self->note->("lock $pathname: did not get lock") if $self->debug;
 
     # If we've run out of tries, and we still don't have the lock,
     # die. (Caller is expecting this.)
-    $self->fatal("can't obtain lock $lockname: $!")
+    $self->fatal->("can't obtain lock $lockname: $!")
       if $tries_left == 0 && !-d $lockname;
 
     # Wwe have tries left, so wait a bit, try to read the owner
@@ -294,10 +297,10 @@ SPIN:
     CORE::sleep $self->sleep;
 
     my $lockee = _read_lock_info($whos_got) // "(unknown)";
-    $self->note("lock #pathname: Lock held by '$lockee'") if $self->debug;
+    $self->note->("lock #pathname: Lock held by '$lockee'") if $self->debug;
 
     if ( $tries_left == 0) {
-      $self->note("lock $pathname: failed - held by $lockee") if $self->debug;
+      $self->note->("lock $pathname: failed - held by $lockee") if $self->debug;
       return ( 0, $lockee );
     }
   }
@@ -306,7 +309,7 @@ SPIN:
   # the lock directory, and we have possession of the lock.
   # Write the owner info out and return success.
   sysopen( my $owner, $whos_got, O_WRONLY | O_CREAT | O_EXCL )
-    or $self->fatal("can't create $whos_got $!");
+    or $self->fatal->("can't create $whos_got $!");
 
   my $locktime = scalar( localtime() );
   chomp $locktime;
@@ -315,10 +318,10 @@ SPIN:
   print $owner $line;
 
   close($owner)
-    or $self->fatal("close failed for $whos_got $!");
+    or $self->fatal->("close failed for $whos_got $!");
 
   $self->locked_files( $pathname, $line );
-  $self->note("lock $pathname: successful");
+  $self->note->("lock $pathname: successful");
   return ( 1, $line );
 }
 
@@ -341,7 +344,7 @@ sub nfunlock {
   my $lockname = _name2lock($pathname);
   my $whos_got = "$lockname/owner";
   unlink($whos_got);
-  $self->note("releasing lock on $lockname") if $self->debug;
+  $self->note->("releasing lock on $lockname") if $self->debug;
   $self->_delete_lock_for($pathname);
   delete $Locked_Files{$pathname};
   return rmdir($lockname);
