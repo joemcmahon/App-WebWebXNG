@@ -472,7 +472,7 @@ sub _dirname {
 
 sub _rewound {
   my ($self, $state) = @_;
-  $self->{_rewound} if defined $state;
+  $self->{_rewound} = $state if defined $state;
   $self->{_rewound};
 }
 
