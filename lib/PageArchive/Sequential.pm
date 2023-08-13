@@ -1,16 +1,20 @@
 use strict;
 use warnings;
+use Try::Tiny;
 
-package PageArchive::RCS;
+package PageArchive::Sequential;
 
 =head1 NAME
 
-PageArchive::RCS - implements the WebWebXNG PageArchive protocol for RCS-based
-page archives.
+PageArchive::Sequential - implements the WebWebXNG PageArchive protocol for a crude
+RCS-like page archive.
 
 =head1 SYNOPSIS
 
-    my $archive = PageArchive::RCS->new($dirname, %File_LockDir_params);
+    my $archive = PageArchive::Sequential->new($dirname, %File_LockDir_params);
+    my %page = $archive->get($name, $version);
+    $archive->put(\%page, $name, $version);
+
 
 =head1 DESCRIPTION
 
@@ -19,6 +23,18 @@ directory. The files contain frozen Storable objects and are cached
 in a DBM-backed hash. This particular implementation has code to work around the problem
 that some Perl installations didn't have a Perl-accessible DBM package
 that could handle entries bigger than 1K.
+
+=head2 DETAILS
+
+PageArchive uses a naming scheme similar to RCS, in that it creates a "PageName,n"
+file for each revision stored, but it does not actually use RCS; it simply writes
+another copy of the file with the appended revision. This uses a lot more disk
+space, but is very simpleminded and easy to debug.
+
+It's obvious that this is not going to work for really large wikis, but we'll
+burn that bridge when we come to it.
+
+There is no working file, just X,1; X,2; X.3; and so on.
 
 =cut
 
@@ -189,12 +205,12 @@ sub max_version {
     my($self, $name) = @_;
     $self->rewind;
 
-   # We use defined() to get a list of versions defined for this name, use
+   # We use page_exists() to get a list of versions defined for this name, use
    # map() to strip off just the versions, sort these numerically in reverse,
    # and then pull off the first (highest) one and return it.
    my @indexes = (sort {$b <=> $a}
                      (map /^.*,(.*)$/,
-                         $self->defined($name)));
+                         $self->page_exists($name)));
    return shift @indexes;
 
 }
@@ -203,7 +219,7 @@ sub max_version {
 
 Fetch a specified version of the entry.
 
-Finds the file, reads it, and uses Storable::inflate to restore it.
+Finds the file, reads it, and uses Storable::retrieve to restore it.
 
 =cut
 
@@ -222,24 +238,16 @@ sub get {
   # This shouldn't happen, unless someone's been fiddling with the database.
   my $handle;
   my $pagefile = $self->_page_in_archive($name, $version);
-  unless ( open($handle, "<", $pagefile) ) {
-    $self->set_error("Unreadable file $pagefile: $!");
-    return;
-  }
 
   # Read the file and uncollapse the data into a hash again.
-  my %oldhash;
-  my @flat = <$handle>;
-  $self->logger->("Read the raw file");
-  close($handle);
-  my $flat   = join( "", @flat );
-  my %fluffy = %{ Storable->inflate( \$flat ) };
+  my %fluffy = Storable->retrieve($pagefile);
   return %fluffy;
 }
 
 =head2 put ($name, $contentsref, $version)
 
-Store an entry.
+Store an entry. Note that we assume version 1 unless we are given a version.
+(This may be erroneous; we'll test it.)
 
 =cut
 
@@ -247,7 +255,7 @@ sub put {
   my ( $self, $name, $contents, $version ) = @_;
 
   # Fix up the version.
-  if ( $version eq "" ) {
+  if ( !defined $version or $version eq "" ) {
     $version = 1;
   } else {
     $version += 0;    # Force to numeric
@@ -255,25 +263,17 @@ sub put {
 
   $self->set_error();
 
-  # Open the file, if we can.
+  my $success = 1;
   my $target = $self->_page_in_archive($name, $version);
-  my $handle;
-  unless ( open( $handle, ">", "$target" ) ) {
-    $self->set_error("Cannot write to $target: $!");
-    return;
+  eval {
+    store $contents, $target;
+  };
+  if ($@) {
+    $self->set_error($@);
+    $success = 0;
   }
 
-  # Flatten and store.
-  my $flat  = Storable->flatten($contents);
-  my $oldfh = select($handle);
-  print $handle $flat;
-  select $oldfh;
-  close $handle;
-
-  # ensure it is group-writeable (insert-mail support).
-  chmod 0664, $target;
-
-  return 1;
+  return $success;
 }
 
 =head2 delete ($title)
@@ -405,9 +405,14 @@ Global error message capture for this instance
 =cut
 
 sub set_error {
-  my ($self) = shift;
-  $self->{ErrorMsg} = join( " ", @_ );
-  $self->logger->( $self->{ErrorMsg} ) if int @_;
+  my ($self, @args) = @_;
+  if (@args) {
+    @args = map { defined $_ ? $_ : "" } @args;
+    $self->{_error_message} = join( " ",  @args );
+    $self->logger->( $self->{_error_message} );
+  } else {
+    $self->{_error_message} = "";
+  }
   return 1;
 }
 
@@ -419,7 +424,7 @@ Fetch last error that occurred.
 
 sub get_error {
   my ($self) = @_;
-  return $self->{ErrorMsg};
+  return $self->{_error_message};
 }
 
 =head2 lock_limit()
@@ -459,7 +464,7 @@ sub rewind {
 
 sub _page_in_archive {
   my ($self, $page_name, $version) = @_;
-  my $f = File::Spec->catdir($self->dirname, $page_name);
+  my $f = File::Spec->catdir($self->_dirname, $page_name);
   $f = "$f,$version" if defined $version;
   return $f;
 }

@@ -1,8 +1,8 @@
 use strict;
 use warnings;
-use Test::More;
+use Test2::V0;
 
-use PageArchive::RCS;
+use PageArchive::Sequential;
 
 pass "load ok";
 

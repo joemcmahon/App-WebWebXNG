@@ -156,7 +156,7 @@ use vars qw( @AdminInfoFields );
 #------------------------------------------------------------------------------
 use Carp;
 use Storable;
-use PageArchive::RCS;
+use PageArchive::Sequential;
 use Sys::Hostname;
 use App::WebWebXNG::AuthManager;
 
