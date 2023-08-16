@@ -144,7 +144,7 @@ sub page_exists {
   $version = "" unless defined $version;
 
   # Search directory for filenames matching.
-  $self->rewind;
+  $self->_rewind;
   $self->_rewound(0);
   return grep( /^$name,$version/, readdir $self->_archive_handle );
 }
@@ -203,7 +203,7 @@ Returns the version number of the newest version.
 
 sub max_version {
     my($self, $name) = @_;
-    $self->rewind;
+    $self->_rewind;
 
    # We use page_exists() to get a list of versions defined for this name, use
    # map() to strip off just the versions, sort these numerically in reverse,
@@ -314,7 +314,7 @@ sub purge {
 
   # Rewind so we see all the files.
   $self->set_error();
-  $self->rewind or return 0;
+  $self->_rewind or return 0;
 
   # Note fancy implied loop done by map. readdir() is evaluated in list
   # context, so it returns all names in the directory.
@@ -336,7 +336,7 @@ sub iterator {
 
   # Get list of all names.
   $self->set_error();
-  $self->rewind or return;    # undefined value
+  $self->_rewind or return;    # undefined value
 
   my (@names) = readdir $self->_archive_handle;
   $self->_rewound(0);
@@ -384,20 +384,6 @@ sub fatal {
   $self->{_fatal};
 }
 
-=head2 _archive_handle
-
-Dirhandle pointing to the page archive. This method is
-privaet because callers should not be trying to directly
-access the archive.
-
-=cut
-
-sub _archive_handle {
-  my ($self, $handle) = @_;
-  $self->{Handle} = $handle if defined $handle;
-  $self->{Handle};
-}
-
 =head2 set_error($msg, $msg, $msg ...)
 
 Global error message capture for this instance
@@ -439,16 +425,43 @@ sub lock_limit {
   $self->{LockLimit};
 }
 
-=head2 rewind
+=head1 PRIVATE METHODS
 
-"Rewind" the directory handle as appropriate. Required for proper
-operation under Win32 Perl.
+These methods are documented so that anyone working on this module has
+a reference for the methods and what they do; they are not a critical
+part of the interface. Any new interface implementing the same protocol
+will only need to implement the public methods.
+
+=head2 _archive_handle
+
+Dirhandle pointing to the page archive. This method is
+private because callers should not be trying to directly
+access the archive, and because access to the directory
+handle is only needed for this module.
+
+=cut
+
+sub _archive_handle {
+  my ($self, $handle) = @_;
+  $self->{Handle} = $handle if defined $handle;
+  $self->{Handle};
+}
+
+=head2 _rewind
+
+"Rewind" the directory handle as appropriate. Required to ensure
+that we access all of the files in the directory for operations
+that read the directory in toto.
+
+Note that Win32 doesn't implement rewinddir; for proper operation
+under Win32 Perl, we have to close and reopen the handle to ensure
+that we read the whole thing.
 
 Returns true if success or false if failure.
 
 =cut
 
-sub rewind {
+sub _rewind {
   my $self    = shift;
   my $success = 1;
 
@@ -462,6 +475,12 @@ sub rewind {
   $success;
 }
 
+=head2 _page_in_archive
+
+Creates the proper path to a page by name and revision.
+
+=cut
+
 sub _page_in_archive {
   my ($self, $page_name, $version) = @_;
   my $f = File::Spec->catdir($self->_dirname, $page_name);
@@ -469,17 +488,40 @@ sub _page_in_archive {
   return $f;
 }
 
+=head2 _dirname
+
+Stores the archive directory name. Needed in particular for Win32 to be
+able to reopen the directory for a simulated rewinddir().
+
+=cut
+
 sub _dirname {
   my($self, $name) = @_;
   $self->{_dirname} = $name if defined $name;
   $self->{_dirname};
 }
 
+=head2 _rewound
+
+Maintains rewind state so that we can minimize the number of
+rewind operations. (It looks like we almost always unconditionally
+rewind anyway right now, so this code may be removed.)
+
+=cut
+
 sub _rewound {
   my ($self, $state) = @_;
   $self->{_rewound} = $state if defined $state;
   $self->{_rewound};
 }
+
+=head2 _locker
+
+Holds the File::LockDir object for this page archive. Not
+needed if there's some other mechanism for locking pages
+or otherwise controlling access.
+
+=cut
 
 sub _locker {
   my ( $self, $locker_object ) = @_;
