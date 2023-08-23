@@ -346,7 +346,6 @@ sub nfunlock {
   unlink($whos_got);
   $self->note->("releasing lock on $lockname") if $self->debug;
   $self->_delete_lock_for($pathname);
-  delete $Locked_Files{$pathname};
   return rmdir($lockname);
 }
 
@@ -367,8 +366,8 @@ sub nlock_state {
   croak "No pathname supplied to nlock_state" unless defined $pathname;
   my $lockname  = _name2lock($pathname);
   my $whos_got  = "$lockname/owner";
-  my $is_locked = $self->_locked_files($pathname);
-  return ( undef, $Locked_Files{$pathname} ) if $is_locked;
+  my $is_locked = $self->locked_files($pathname);
+  return ( undef, $is_locked ) if $is_locked;
 
   return ( 1, undef ) if !-d $lockname;
 
