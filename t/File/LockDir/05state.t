@@ -30,15 +30,15 @@ my ($status, $owner) = $locker->nflock($path, 0, "TestUser");
 is($status, 1, "file is now locked");
 like($owner, qr/TestUser from .*? since /, "locked by TestUser");
 
-my ($state, $lockee) = $locker->nlock_state($path);
-is $state, undef, "it's locked";
-like $lockee, qr/^TestUser/, "right person";
+my ($state, $locking_user) = $locker->nlock_state($path);
+is $state, 1, "it's locked";
+like $locking_user, qr/^TestUser/, "right person";
 
 $locker->nfunlock($path);
 
-($state, $lockee) = $locker->nlock_state($path);
-is $state, 1, "it's unlocked";
-is $lockee, undef, "held by no one";
+($state, $locking_user) = $locker->nlock_state($path);
+is $state, undef, "it's unlocked";
+is $locking_user, undef, "held by no one";
 
 
 done_testing;

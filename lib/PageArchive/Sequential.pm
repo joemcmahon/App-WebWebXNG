@@ -1,10 +1,9 @@
 use strict;
 use warnings;
-use Try::Tiny;
 
 package PageArchive::Sequential;
 use File::Path qw(make_path);
-
+use Try::Tiny;
 
 =head1 NAME
 
@@ -37,6 +36,14 @@ It's obvious that this is not going to work for really large wikis, but we'll
 burn that bridge when we come to it.
 
 There is no working file, just X,1; X,2; X.3; and so on.
+
+We lock I<all> versions of a file when we grab the lock; this prevents someone
+from mucking up the history behind our backs while we're attempting an operation.
+Obviously something that actually checks out the file in a non-shared area
+would be much better. It's done this way in this module because we didn't want
+to require anyone deploying the wiki to be beholden to having a particular
+SCM installed. (Also because this was the original implementation, and we were
+more interested in getting a minimum viable product out.)
 
 =cut
 
@@ -152,7 +159,7 @@ Returns undef if the entry can't be locked, true otherwise.
 sub lock {
   my ( $self, $name, $who, $host ) = @_;
   my ( $which, $locked_by ) =
-    $self->locker->nflock(
+    $self->_locker->nflock(
       $self->_page_in_archive($name),
       $self->lock_limit(),
       $who,
@@ -170,7 +177,7 @@ Returns undef if the entry wasn't locked, true otherwise.
 
 sub unlock {
   my ( $self, $name ) = @_;
-  $self->locker->nfunlock($self->_page_in_archive($name));
+  $self->_locker->nfunlock($self->_page_in_archive($name));
 }
 
 =head2 is_unlocked($name)
@@ -184,7 +191,7 @@ Returns: (1, undef) if the entry is unlocked
 
 sub is_unlocked {
   my ( $self, $name ) = @_;
-  return $self->locker->nlock_state($self->_page_in_archive($name));
+  return $self->_locker->nlock_state($self->_page_in_archive($name));
 }
 
 =head2 max_version($name)

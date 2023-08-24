@@ -267,7 +267,7 @@ sub nflock {
   # Stay in this block until we either successfully create the
   # lock directory, we run out of tries, or we time out.
   my $tries_left = $self->tries;
-  $self->note->("lock $pathname: attempt to obtain lock");
+  $self->note->("lock $pathname: attempt to obtain lock") if $self->debug;
 SPIN:
   while (1) {
     $self->note->("lock $pathname: try $tries_left") if $self->debug;
@@ -296,12 +296,12 @@ SPIN:
     # owner info.
     CORE::sleep $self->sleep;
 
-    my $lockee = _read_lock_info($whos_got) // "(unknown)";
-    $self->note->("lock #pathname: Lock held by '$lockee'") if $self->debug;
+    my $locking_user = _read_lock_info($whos_got) // "(unknown)";
+    $self->note->("lock #pathname: Lock held by '$locking_user'") if $self->debug;
 
     if ( $tries_left == 0) {
-      $self->note->("lock $pathname: failed - held by $lockee") if $self->debug;
-      return ( 0, $lockee );
+      $self->note->("lock $pathname: failed - held by $locking_user") if $self->debug;
+      return ( 0, $locking_user );
     }
   }
 
@@ -321,7 +321,7 @@ SPIN:
     or $self->fatal->("close failed for $whos_got $!");
 
   $self->locked_files( $pathname, $line );
-  $self->note->("lock $pathname: successful");
+  $self->note->("lock $pathname: successful") if $self->debug;
   return ( 1, $line );
 }
 
@@ -364,18 +364,28 @@ Checks lock state for the given path.
 sub nlock_state {
   my($self, $pathname) = @_;
   croak "No pathname supplied to nlock_state" unless defined $pathname;
-  my $lockname  = _name2lock($pathname);
-  my $whos_got  = "$lockname/owner";
+
   my $is_locked = $self->locked_files($pathname);
-  return ( undef, $is_locked ) if $is_locked;
+  # If in the lock cache, we don't have to look at the disk.
+  return ( 1, $is_locked ) if $is_locked;
 
-  return ( 1, undef ) if !-d $lockname;
+  # Wasn't in the cache. If the lock dir doesn't exist, we're unlocked.
+  my $lockname  = _name2lock($pathname);
+  return ( undef, undef ) if !-d $lockname;
 
-  my $lockee = _read_lock_info($whos_got);
-  return ( undef, $lockee );
+  # Lock dir exists, read the owner info.
+  my $whos_got = _owner_file($lockname);
+  my $locking_user = _read_lock_info($whos_got);
+  return ( 1, $locking_user );
 }
 
 # helper functions
+
+sub _owner_file {
+  my($lockname) = shift;
+  return File::Spec->catfile($lockname, "owner");
+}
+
 sub _name2lock {
   my $pathname = shift;
   my $dir      = dirname($pathname);
@@ -388,10 +398,10 @@ sub _name2lock {
 sub _read_lock_info {
   my ($whos_got) = @_;
   open( my $owner, "<", $whos_got ) || return;
-  my $lockee = <$owner>;
+  my $locking_user = <$owner>;
   close $owner;
-  chomp($lockee);
-  return $lockee;
+  chomp($locking_user);
+  return $locking_user;
 }
 1;
 
