@@ -25,4 +25,13 @@ chmod 0000, $fname;
 ok !$archive->put($name, $contents), "put call failed";
 like $archive->get_error, qr/can't create .*SamplePage,1: Permission denied/, "right error";
 
+ok $archive->put($name, $contents, 2), "explicit version succeeds";
+is $archive->get_error, "", "no error message";
+$fname = $archive->_page_in_archive($name, 2);
+ok -e $fname, "versioned file exists";
+ok $archive->page_exists($name), "at least one version exists";
+ok $archive->page_exists($name,1), "version 1 still there";
+ok $archive->page_exists($name,2), "version 2 still there";
+ok ! $archive->page_exists($name,44), "nonexistent version not there";
+
 done_testing;

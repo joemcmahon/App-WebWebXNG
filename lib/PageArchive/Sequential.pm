@@ -3,6 +3,8 @@ use warnings;
 use Try::Tiny;
 
 package PageArchive::Sequential;
+use File::Path qw(make_path);
+
 
 =head1 NAME
 
@@ -78,18 +80,8 @@ sub new {
   # return undef if we can't.
   unless ( -d $dirname ) {    # Not a dir or doesn't exist
     unless ( -e $dirname ) {    # Doesn't exist
-                                # Make the directory, including parent dirs.
-                                # Return undef if we fail along the way.
-                                # XXX: use File::Path!
-      my @path             = split( '/', $dirname );
-      my $accumulated_path = "";
-      foreach (@path) {
-        $accumulated_path .= "/$_";
-        next if -e $accumulated_path and -d _;
-        unless ( mkdir $accumulated_path, 0700 ) {
-          $self->fatal->("Can't create $accumulated_path: $!");
-        }
-      }
+      try { make_path($dirname) }
+      catch { ($self->fatal->("Can't build path $dirname: $_")) }
     } else {    # Exists, but is not a directory
       $self->fatal->("$dirname exists, but is not a directory");
     }
