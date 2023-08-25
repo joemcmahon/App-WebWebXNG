@@ -4,6 +4,12 @@ use warnings;
 package PageArchive::Sequential;
 use File::Path qw(make_path);
 use Try::Tiny;
+use Carp;
+use Storable;
+use File::LockDir;
+use Data::Dumper;
+
+use constant DEFAULT_LOCK_LIMIT => 30;
 
 =head1 NAME
 
@@ -45,15 +51,6 @@ to require anyone deploying the wiki to be beholden to having a particular
 SCM installed. (Also because this was the original implementation, and we were
 more interested in getting a minimum viable product out.)
 
-=cut
-
-use Carp;
-use Storable;
-use File::LockDir;
-use Data::Dumper;
-
-use constant DEFAULT_LOCK_LIMIT => 30;
-
 =head1 CLASS METHODS
 
 =head2 new
@@ -78,7 +75,7 @@ sub new {
   bless $self, $class;
 
   # Set up the File::LockDir callbacks.
-  $self->logger( $params{Logger} || sub { print STDERR @_ } );
+  $self->logger( $params{Logger} || sub { print STDERR @_,"\n" } );
   $self->fatal( $params{Fatal}   || sub { croak @_ } );
 
   $self->set_error();
@@ -200,16 +197,21 @@ Determine the maximum version # of a given entry.
 
 Returns the version number of the newest version.
 
+=cut
+
 sub max_version {
     my($self, $name) = @_;
     $self->_rewind;
 
-   # We use page_exists() to get a list of versions defined for this name, use
-   # map() to strip off just the versions, sort these numerically in reverse,
-   # and then pull off the first (highest) one and return it.
-   my @indexes = (sort {$b <=> $a}
-                     (map /^.*,(.*)$/,
-                         $self->page_exists($name)));
+   # We use page_exists() to get a list of versions defined for this name,
+   # and do a Schwartzian transform to sort the versions descending, then
+   # extract the matching filename. Needed because the filenames don't have
+   # leading zeroes in the versions, and therefore can't be sorted correctly
+   # with 'cmp'.
+   my @indexes = map  { $_->[1] }
+                 sort { $b->[1] <=> $a->[1] }
+                 map  { /^.*,(.*)$/; [$_, $1] }
+                 $self->page_exists($name);
    return shift @indexes;
 
 }
@@ -220,13 +222,15 @@ Fetch a specified version of the entry.
 
 Finds the file, reads it, and uses Storable::retrieve to restore it.
 
+Returns a hash (I<not> a hash reference!).
+
 =cut
 
 sub get {
   my ( $self, $name, $version ) = @_;
   $version = $self->max_version($name) unless $version;
 
-  $self->logger->("Getting $name,$version");
+  $self->logger->("Getting $name,$version") if $self->debug;
   $self->set_error();
 
   unless ( $self->page_exists( $name, $version ) ) {
@@ -239,8 +243,7 @@ sub get {
   my $pagefile = $self->_page_in_archive($name, $version);
 
   # Read the file and uncollapse the data into a hash again.
-  my %fluffy = Storable->retrieve($pagefile);
-  return %fluffy;
+  %{retrieve($pagefile)};
 }
 
 =head2 put ($name, $contentsref, $version)
@@ -424,6 +427,18 @@ sub lock_limit {
   $self->{LockLimit};
 }
 
+=head2 debug
+
+Setter/getter for debugging flag.
+
+=cut
+
+sub debug {
+  my($self, $state) = @_;
+  $self->{_debug} = $state if defined $state;
+  $self->{_debug};
+}
+
 =head1 PRIVATE METHODS
 
 These methods are documented so that anyone working on this module has
@@ -482,9 +497,9 @@ Creates the proper path to a page by name and revision.
 
 sub _page_in_archive {
   my ($self, $page_name, $version) = @_;
+  $version = $self->max_version($page_name) unless $version;
   my $f = File::Spec->catdir($self->_dirname, $page_name);
-  $f = "$f,$version" if defined $version;
-  return $f;
+  "$f,$version";
 }
 
 =head2 _dirname
