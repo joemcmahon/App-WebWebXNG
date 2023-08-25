@@ -75,8 +75,8 @@ sub new {
   bless $self, $class;
 
   # Set up the File::LockDir callbacks.
-  $self->logger( $params{Logger} || sub { print STDERR @_,"\n" } );
-  $self->fatal( $params{Fatal}   || sub { croak @_ } );
+  $self->logger( $params{logger} || sub { print STDERR @_,"\n" } );
+  $self->fatal( $params{fatal}   || sub { croak @_ } );
 
   $self->set_error();
 
@@ -200,20 +200,25 @@ Returns the version number of the newest version.
 =cut
 
 sub max_version {
-    my($self, $name) = @_;
-    $self->_rewind;
+  my($self, $name) = @_;
+  $self->_rewind;
 
-   # We use page_exists() to get a list of versions defined for this name,
-   # and do a Schwartzian transform to sort the versions descending, then
-   # extract the matching filename. Needed because the filenames don't have
-   # leading zeroes in the versions, and therefore can't be sorted correctly
-   # with 'cmp'.
-   my @indexes = map  { $_->[1] }
-                 sort { $b->[1] <=> $a->[1] }
-                 map  { /^.*,(.*)$/; [$_, $1] }
-                 $self->page_exists($name);
-   return shift @indexes;
+  # Return undef if there are no pages by this name at all.
+  # (Throw away any lockfiles; they're not part of the versioning.)
+  my @pages = grep { /,\d+$/ } $self->page_exists($name);
+  return unless @pages;
 
+  # We use page_exists() to get a list of versions defined for this name,
+  # and do a Schwartzian transform to sort the versions descending, then
+  # extract the matching filename. Needed because the filenames don't have
+  # leading zeroes in the versions, and therefore can't be sorted correctly
+  # with 'cmp'.
+
+  my @indexes = map  { $_->[1] }
+                sort { $b->[1] <=> $a->[1] }
+                map  { /^.*,(.*)$/; [$_, $1] }
+                @pages;
+  return shift @indexes;
 }
 
 =head2 get($name,$version)
@@ -234,7 +239,7 @@ sub get {
   $self->set_error();
 
   unless ( $self->page_exists( $name, $version ) ) {
-    $self->set_error($self->_page_in_archive . ",$version does not exist");
+    $self->set_error("version $version of $name does not exist");
     return;
   }
 

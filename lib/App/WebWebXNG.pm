@@ -3479,8 +3479,8 @@ sub main {
 
   $PageArchive = PageArchive::RCS->new(
     $DataDir,
-    Logger => \&main::note,
-    Fatal  => \&main::FatalError
+    logger => \&main::note,
+    fatal  => \&main::FatalError
   );
 
   my $errstate = $PageArchive->getError();

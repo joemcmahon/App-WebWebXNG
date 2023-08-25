@@ -40,4 +40,7 @@ ok $archive->page_exists($name, 437), "version 437 there";
 my $v = $archive->max_version($name);
 is $v, 437, "verify true max version is found";
 
+my $none = $archive->max_version("hoogie");
+is $none, undef, "There are no pages named 'hoogie'";
+
 done_testing;
