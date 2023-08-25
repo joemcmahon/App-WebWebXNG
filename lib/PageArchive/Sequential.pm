@@ -351,12 +351,15 @@ sub iterator {
   # Scan through names, returning highest-numbered version for each.
   my %highest = ();
   foreach (@names) {
-    $^W = 0;
+    next if /^\.+/;
     my ( $name, $version ) = /^(.*),(.*)/;
-    if ( $highest{$name} < $version ) {
+    croak "Got an undefined name" unless defined $name;
+    croak "Got an undefined version" unless defined $version;
+    if (!exists $highest{$name}) {
+      $highest{$name} = $version;
+    } elsif ( $highest{$name} < $version ) {
       $highest{$name} = $version;
     }
-    $^W = 1;
   }
 
   #  Build iterator as "name,version" entries.
