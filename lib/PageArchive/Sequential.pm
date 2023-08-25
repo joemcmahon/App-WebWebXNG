@@ -293,7 +293,7 @@ sub delete {
   my ( $self, $name, $version ) = @_;
 
   # Fix up the version.
-  if ( $version eq undef ) {
+  if ( !defined $version ) {
     $version = $self->max_version($name);
   } else {
     $version += 0 if $version ne "";    # Force to numeric if needed
