@@ -1,4 +1,26 @@
+# ABSTRACT: Mojolicious core module for WebWebXNG
+
 package WebWebXNG;
+
+=head1 NAME
+
+WebWebXNG - core Mojo module for the WebWebXNG wiki
+
+=head1 SYNOPSIS
+
+   use Mojo::File qw(curfile);
+   use lib curfile->dirname->sibling('lib')->to_string;
+   use Mojolicious::Commands;
+
+   # Start command line interface for application
+   # Mojolicious::Commands->start_app('WebWebXNG');
+
+=head1 DESCRIPTION
+
+Base module; loads config, sets up routes, runs the server.
+
+=cut
+
 use Mojo::Base 'Mojolicious', -signatures;
 
 use App::WebWebXNG;
@@ -41,7 +63,8 @@ sub startup ($self) {
   $r->get('/GlobalPurge')->to("Example#welcome");   #HandleGlobalPurge
 
   # All of these are probably also going to need POST endpoints as well.
-  # Adding only the GETs for now.
+  # Adding only the GETs for now. This enables us to pass the tests and
+  # adds placeholders for the stuff we need to actually implement.
 }
 
 1;
