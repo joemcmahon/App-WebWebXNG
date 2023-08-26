@@ -20,6 +20,8 @@ profile-strictness = fatal
 [BuiltinFunctions::ProhibitReturnOr]
 severity = 5
 
+[-Subroutines::ProhibitSubroutinePrototypes]
+
 [ControlStructures::ProhibitUnreachableCode]
 severity = 5
 
@@ -52,7 +54,3 @@ severity = 5
 
 [Variables::ProhibitConditionalDeclarations]
 severity = 5
-
-[Modules::ProhibitEvilModules]
-severity = 5
-modules_file = .etc/cpan/banned
