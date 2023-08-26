@@ -25,13 +25,37 @@ use Mojo::Base 'Mojolicious', -signatures;
 
 =head1 CLASS METHODS
 
-=head2 run
+=head2 startup
 
-Called to launch the application.
+Mojo-required method to set up routes. This replaces WebWebX's
+router hash.
 
 =cut
 
-sub run {
+# Stubbing all the functions to start.
+sub startup ($self) {
+  $self->routes->get('/SearchRefs')->to("dev#hello");    #HandleSearch
+  $self->routes->get('/ViewPage')->to("dev#hello");      #HandleView
+  $self->routes->get('/ShowDiffs')->to("dev#hello");     #HandleDiffs
+  $self->routes->get('/EditLinks')->to("dev#hello");     #HandleLinks
+  $self->routes->get('/EditLink')->to("dev#hello");      #HandleEditLink
+  $self->routes->get('/EditPage')->to("dev#hello");      #HandleEdit
+  $self->routes->get('/RestorePage')->to("dev#hello");   #HandleRestore
+  $self->routes->get('/PurgePage')->to("dev#hello");     #HandlePurge
+  $self->routes->get('/PageProps')->to("dev#hello");     #HandleProperties
+  $self->routes->get('/PageInfo')->to("dev#hello");      #HandleInfo
+  $self->routes->get('/RenamePage')->to("dev#hello");    #HandleRename
+  $self->routes->get('/DeletePage')->to("dev#hello");    #HandleDelete
+  $self->routes->get('/MailNotify')->to("dev#hello");    #HandleMail
+  $self->routes->get('/EditMail')->to("dev#hello");      #HandleEditMail
+  $self->routes->get('/RecentChanges')->to("dev#hello"); #HandleRecentChanges
+  $self->routes->get('/SetAdminData')->to("dev#hello");  #EditAdminRecord
+  $self->routes->get('/UnlockFile')->to("dev#hello");    #UnlockFile
+  $self->routes->get('/ManageUsers')->to("dev#hello");   #ManageUsers
+  $self->routes->get('/UserPWChange')->to("dev#hello");  #UserPWChange
+  $self->routes->get('/GlobalPurge')->to("dev#hello");   #HandleGlobalPurge
 }
 
-run unless caller();
+if (caller) {
+  app->start;
+}
