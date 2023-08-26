@@ -23,8 +23,6 @@ Base module; loads config, sets up routes, runs the server.
 
 use Mojo::Base 'Mojolicious', -signatures;
 
-use App::WebWebXNG;
-
 # This method will run once at server start
 sub startup ($self) {
 
