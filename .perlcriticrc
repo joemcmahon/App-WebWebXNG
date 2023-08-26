@@ -34,15 +34,15 @@ severity = 5
 
 [Moose::RequireMakeImmutable]
 severity = 5
-equivalent_modules = ZR::Moose Test::Class::Moose
+equivalent_modules = Test::Class::Moose
 
 [TestingAndDebugging::RequireUseStrict]
 severity = 5
-equivalent_modules = strictures Moo Moo::Role Role::Tiny MooseX::Singleton MooseX::MethodAttributes::Role HTML::FormHandler::Moose HTML::FormHandler::Moose::Role Test::Class::Moose Test::Class::Moose::Role DBIx::Class::Candy DBIx::Class::Candy::ResultSet ZR::DBIC::ResultSugar ZR::DBIC::ResultSetSugar ZR::Moose ZR::Moose::Role ZR::Moose::Script StarterView::Bundle::Catalyst::Controller ZR::Finance::DBIC::BillingResultSugar Test2::V0 ZR::Test Test::Class::Moose::Lite ZR::Base zrunit
+equivalent_modules = strictures Moo Moo::Role Role::Tiny MooseX::Singleton MooseX::MethodAttributes::Role HTML::FormHandler::Moose HTML::FormHandler::Moose::Role Test::Class::Moose Test::Class::Moose::Role DBIx::Class::Candy DBIx::Class::Candy::ResultSet R::DBIC::ResultSugar Test2::V0 Test::Class::Moose::Lite
 
 [TestingAndDebugging::RequireUseWarnings]
 severity = 5
-equivalent_modules = strictures Moo Moo::Role Role::Tiny MooseX::Singleton MooseX::MethodAttributes::Role HTML::FormHandler::Moose HTML::FormHandler::Moose::Role Test::Class::Moose Test::Class::Moose::Role DBIx::Class::Candy DBIx::Class::Candy::ResultSet ZR::DBIC::ResultSugar ZR::DBIC::ResultSetSugar ZR::Moose ZR::Moose::Role ZR::Moose::Script StarterView::Bundle::Catalyst::Controller ZR::Finance::DBIC::BillingResultSugar Test2::V0 ZR::Test Test::Class::Moose::Lite ZR::Base zrunit
+equivalent_modules = strictures Moo Moo::Role Role::Tiny MooseX::Singleton MooseX::MethodAttributes::Role HTML::FormHandler::Moose HTML::FormHandler::Moose::Role Test::Class::Moose Test::Class::Moose::Role DBIx::Class::Candy DBIx::Class::Candy::ResultSet Test2::V0 Test::Class::Moose::Lite
 
 [TryTiny::RequireBlockTermination]
 severity = 5
