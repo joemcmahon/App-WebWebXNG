@@ -1,3 +1,30 @@
 ---
+# Default page rendered if no page is given.
+front_page: FrontPage
+
+# Page rendered to do searches.
+search_page: SearchForm
+
+# How many minutes to wait before sending out another modification notification.
+notification_delay_minutes: 5
+
+# Max number of entries on the RecentChanges page.
+max_recent_changes: 30
+
+# 1 if we want to use icons in the sidebar, 0 if not.
+cute_icons: 1
+
+# 1 if we want page locking, 0 if we can live with possible edit races.
+aggressive_locking: 1
+
+# 1 if the wiki should block anonymous users, 0 if not.
+block_anon_users: 1
+
+# 1 of only admins can force unlocks, 0 if any logged-in user may.
+only_admins_can_unlock: 1
+
+# 0 if debugging should be off, 1 if it's on.
+debug: 0
+
 secrets:
   - f970899083594eb6f42288ba76dd73a06f2e0efd
