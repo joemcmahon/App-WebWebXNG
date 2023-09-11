@@ -12,7 +12,7 @@ create table users (
 create table settings (
   id integer primary key autoincrement,
   front_page text not null default "FrontPage",
-  search_page text not null default "SeatchForm",
+  search_page text not null default "SearchForm",
   notify_sensitivity integer not null default 5,
   max_recent_changes integer not null default 20,
   cute_icons integer not null default 1,
