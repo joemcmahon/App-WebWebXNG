@@ -1,0 +1,38 @@
+% layout 'default';
+
+<br /> <br />
+
+<div class="container">
+    <div class="card col-sm-6 mx-auto">
+        <div class="card-header text-center">
+            User Sign In
+        </div>
+        <br /> <br />
+        <form method="post" action='/login'>
+            <input class="form-control"
+                   id="username"
+                   name="username"
+                   type="email" size="40"
+                   placeholder="Enter Username"
+             />
+            <br />
+            <input class="form-control
+                   id="password"
+                   name="password"
+                   type="password"
+                   size="40"
+                   placeholder="Enter Password"
+             />
+            <br />
+            <input class="btn btn-primary" type="submit" value="Sign In">
+            <br />  <br />
+        </form>
+
+        % if ($error) {
+            <div class="error" style="color: red">
+                <small> <%= $error %> </small>
+            </div>
+        %}
+    </div>
+
+</div>

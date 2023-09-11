@@ -1,0 +1,30 @@
+-- 1 up
+create table users (
+  id integer primary key autoincrement,
+  username text not null unique,
+  first_name text not null,
+  last_name text not_null,
+  email not_null,
+  password_hash text not null,
+  verified integer not null default 0
+);
+
+create table settings (
+  id integer primary key autoincrement,
+  front_page text not null default "FrontPage",
+  search_page text not null default "SeatchForm",
+  notify_sensitivity integer not null default 5,
+  max_recent_changes integer not null default 20,
+  cute_icons integer not null default 1,
+  aggressive_locking integer not null default 1,
+  block_anon_edits integer not null default 1,
+  anon_append integer not null default 0,
+  only_admin_can_unock integer not null default 0,
+  debug integer not null default 0,
+  data_dir text not null default "",
+  lock_dir text not null default ""
+);
+
+-- 1 down
+drop table if exists users;
+drop table if exists settings;
