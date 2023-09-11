@@ -3,6 +3,8 @@ use Mojo::Base -base, -signatures;
 use Carp ();
 use Crypt::Passphrase;
 
+has sqlite => sub { die "SQLite database must be supplied" };
+
 =head1 NAME
 
 WebWebXNG::Model::Settings - support functions for wiki settings
@@ -41,9 +43,20 @@ sub load($self) {
   my $sql = <<SQL;
     select * from settings where settings.id = ?;
 SQL
- return $self->sqlite->db
-   ->query($sql, $self->fixed_id)
-   ->rows;
+  my $contents = $self->sqlite->db
+    ->query($sql, $self->fixed_id)
+    ->hash;
+  if (not defined $contents) {
+    # Insert record at fixed id, forcing defaults.
+    my $contents = {
+      id => $self->fixed_id,
+      data_dir => "",
+      lock_dir => "",
+    };
+    $self->sqlite->db->insert('settings', $contents);
+    return $self->load;
+  }
+  return $contents;
 }
 
 =head2 save($settings_hash)
@@ -54,23 +67,14 @@ using insert or update as appropriate.
 =cut
 
 sub save($self, $settings_hash) {
-  my %old_settings = $self->load;
-
-  # Make a local copy to ensure we don't modify the caller's copy,
-  # then make sure we're going to store it under the fixed id.
-  my %new_settings = %$settings_hash;
-  $new_settings{id} = $self->fixed_id;
-
-  if (keys %old_settings) {
-    # We had settings, so merge the new and old ones, with the new
-    # ones getting priority. Then update the existing record.
-    %new_settings = (%new_settings, %old_settings);
-    $self->sqlite->db->update('settings', \%new_settings);
-  } else {
-    # We didn't have any settings, so insert the supplied ones.
-    # XXX: How do we check for a failed settings create?
-    $self->sqlite->db->insert('settings', \%new_settings);
+  my $new_settings = $settings_hash;
+  $new_settings->{id} = $self->fixed_id;
+  my @update_list;
+  for my $key (keys %$new_settings) {
+    push @update_list, {$key => $new_settings->{$key}};
   }
+  $self->sqlite->db->update('settings', @update_list);
+  return $self->load;
 }
 
 1;
