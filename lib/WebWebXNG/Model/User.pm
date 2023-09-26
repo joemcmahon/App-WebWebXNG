@@ -5,6 +5,8 @@ use Mojo::Base -base, -signatures;
 use Carp ();
 use Crypt::Passphrase;
 
+use constant MINIMUM_PASSWORD_LENGTH => 10;
+
 has sqlite => sub { die "SQLite database must be supplied" };
 
 =head1 NAME
@@ -67,6 +69,13 @@ Should return a status and an error, Go-style; currently just returns an ID
 sub add($self, $username, $first_name, $last_name, $email, $password) {
   # TODO: ban list for emails!
   return if $self->exists($username);
+
+  # Minimal validation. All of the supplied fields have to be there
+  # and be non-null.
+  for my $field ($username, $first_name, $last_name, $email) {
+    return unless $field;
+  }
+  return unless $self->_password_is_reasonable($password);
 
   # Insert if this user does not exist.
   return $self
@@ -151,6 +160,18 @@ sub _hash_password($password) {
     return $authenticator->hash_password($password);
 }
 
+# Returns true if the password meets our minimum requirements.
+# XXX: We might want to put some or all of these in settings.
+#      Though if we do, someone will turn everything off and
+#      then be upset when their database fills up with craziness.
+sub _password_is_reasonable($self, $p) {
+  return unless length($p) > MINIMUM_PASSWORD_LENGTH;
+  return unless $p =~ /\d/ # at least one digit
+            and $p =~ /[[:upper:]]/ # at least one upper-case char
+            and $p =~ /[[:lower:]]/ # at least one lower-case char
+            and $p =~ /[^[:alnum:]]/ # at least one special
+          ;
+}
 
 1;
 
