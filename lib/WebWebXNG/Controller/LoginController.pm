@@ -30,42 +30,14 @@ sub user_login($c) {
     my $username = $c->param('username');                               # From the form
     my $password = $c->param('password');                               # From the form
 
-    my $db_object = $c->app->{_dbh};
-
-    $c->app->plugin('authentication' => {
-        autoload_user   => 1,
-        wickedapp       => 'YouAreLogIn',
-        load_user       => sub {
-            my ($c, $user_key) = @_;
-            my @user = $db_object->resultset('User')->search({
-                id => $user_key
-            });
-
-            return \@user;
-        },
-        validate_user   => sub {
-            my ($c, $username, $password) = @_;
-
-            my $user_key = validate_user_login($db_object, $username, $password);
-
-            if ( $user_key ) {
-                $c->session(user => $user_key);
-                return $user_key;
-            }
-            else {
-                return undef;
-            }
-        },
-    });
-
-    my $auth_key = $c->authenticate($username, $password );
-
-    if ( $auth_key )  {
-        $c->flash( message => 'Logged in');
-        return $c->redirect_to('/FrontPage');
+    my $user_key = $c->app->users->validate_login($username, $password);
+    if ($user_key) {
+      $c->session(user => $user_key);
+      $c->flash( message => 'Logged in');
+      return $c->redirect_to('/FrontPage');
     }
     else {
-        $c->flash( error => 'Invalid credentials');
+        $c->flash( error => 'Login failed. (Are you validated?)');
         $c->redirect_to('login');
     }
 }
