@@ -26,6 +26,34 @@ and removing users (especially removing non-validated users).
 
 =head1 METHODS
 
+=cut
+
+# _read is a utility used across many of the methods. It
+# allows us to get around Mojo's limitation of a single
+# primary key for each table in SQLite.
+#
+# It finds the user by username and returns a hash of the
+# values for that user.
+sub _read($self, $username) {
+  my $sql = <<SQL;
+    select * from users
+    where users.username = ?
+SQL
+  return $self->sqlite->db
+    ->query($sql, $username)
+    ->hash // {};
+}
+
+=head2 exists($username)
+
+Returns true if the user exists, false if not.
+
+=cut
+
+sub exists($self, $username) {
+  return $self->_read($username)->{id};
+}
+
 =head2 add($username, $first, $last, $email, $password)
 
 Adds a new user to the database. User's password hash is generated, and the user
@@ -44,14 +72,13 @@ sub add($self, $username, $first_name, $last_name, $email, $password) {
   # TODO: ban list for emails!
 
   # For now we're banning multiple accounts from the same email or username.
-  return if $self->sqlite->db->select(
-    'users',
-    {email => $email}
-  )->rows;
-  return if $self->sqlite->db->select(
-    'users',
-    {username => $username}
-  )->rows;
+  return if $self->exists($username);
+
+  my $sql = <<SQL;
+    select id from users
+    where email = ?
+SQL
+  return if $self->sqlite->db->query($sql, $email)->rows;
 
   # No account with this email or username.
   return $self
@@ -70,7 +97,7 @@ sub add($self, $username, $first_name, $last_name, $email, $password) {
  )->last_insert_id;
 }
 
-=head2 set_verification($username)
+=head2 set_verified($username)
 
 Turn on the verification flag for a user. Should be used
 in concert with someother authentication mechanism (e.g.,
@@ -79,21 +106,14 @@ in concert with someother authentication mechanism (e.g.,
 =cut
 
 sub set_verified($self, $username) {
+  my $id = $self->exists($username);
+  return unless $id;
+
   return $self->sqlite->db
     ->update('users',
       {verified => 1},
-      {usename => $username},
+      {id => $id},
     )->rows;
-}
-
-=head2 exists($username)
-
-Returns true if the user exists, false if not.
-
-=cut
-
-sub exists($self, $username) {
-  return $self->_read($username);
 }
 
 =head2 is_verified($username)
@@ -103,12 +123,16 @@ Returns true if the user is verified, false if not.
 =cut
 
 sub is_verified($self, $username) {
-  my $sql =<<SQL;
-    select verified from users
-    where username = ?
+  my $id = $self->exists($username);
+  return unless $id;
+
+  my $sql = <<SQL;
+  select * from users
+  where id = ?
+    and verified = 1;
 SQL
   return $self->sqlite->db
-    ->query($sql, $username)->rows;
+    ->query($sql, $id)->hash;
 }
 
 =head2 validate_login($username, $password)
@@ -124,7 +148,7 @@ sub validate_login($self, $username, $password) {
 
   my $sql = <<SQL;
     select password_hash from users
-    where user.username = ?
+    where users.username = ?
 SQL
 
   # Usernames are unique, so there will be either 0 or 1 hit.
@@ -148,11 +172,7 @@ sub _hash_password($password) {
     return $authenticator->hash_password($password);
 }
 
-sub _read($self, $username) {
-  return $self->sqlite->db
-    ->select('users', {username => $username})
-    ->hash;
-}
+
 1;
 
 
