@@ -128,7 +128,7 @@ SQL
   );
 }
 
-# Create a password gasg to be stored in the user record.
+# Create a password hash to be stored in the user record.
 sub _hash_password($password) {
     my $authenticator =  Crypt::Passphrase->new(
       encoder    => 'Argon2',
