@@ -25,10 +25,10 @@ my $user_model = WebWebXNG::Model::User->new(sqlite => $app->sqlite);
 ok $user_model, "got user model";
 
 # 2.1 Adding a user with the same username fails.
-my $result = $user_model->add("TestUserOne", "Test", "User", "test\@example.com", "thiswillnotflylater");
+my $result = $user_model->add("TestUserOne", "Test", "User", "test\@example.com", "thiswillnotflylater88Z!");
 ok $result, "user was added successfully";
 ok defined $user_model->exists("TestUserOne"), "exists confirms";
-$result = $user_model->add("TestUserOne", "Another", "User", "test2\@example.com", "thiswillnotflylater");
+$result = $user_model->add("TestUserOne", "Another", "User", "test2\@example.com", "thiswillnotflylater88Z!");
 ok !$result, "Can't add the same username twice";
 
 done_testing();

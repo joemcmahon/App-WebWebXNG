@@ -25,7 +25,7 @@ my $user_model = WebWebXNG::Model::User->new(sqlite => $app->sqlite);
 ok $user_model, "got user model";
 
 # 2. Adding a user works, and the added user exists.
-my $result = $user_model->add("TestUserOne", "Test", "User", "test\@example.com", "thiswillnotflylater");
+my $result = $user_model->add("TestUserOne", "Test", "User", "test\@example.com", "thiswillnotflylater99()Z");
 ok $result, "user was added successfully";
 ok defined $user_model->exists("TestUserOne"), "exists confirms";
 

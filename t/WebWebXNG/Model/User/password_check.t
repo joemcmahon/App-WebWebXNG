@@ -25,14 +25,14 @@ my $user_model = WebWebXNG::Model::User->new(sqlite => $app->sqlite);
 ok $user_model, "got user model";
 
 # 2. Adding a user works, and the added user exists.
-my $result = $user_model->add("TestUserOne", "Test", "User", "test\@example.com", "thiswillnotflylater");
+my $result = $user_model->add("TestUserOne", "Test", "User", "test\@example.com", "thiswillnotflylater88%Q");
 ok $result, "user was added successfully";
 ok defined $user_model->exists("TestUserOne"), "exists confirms";
 
 # 7. Password hashing works.
 ok !$user_model->validate_login('TestUserOne', 'wrong'), "bad password fails";
-ok !$user_model->validate_login('TestUserOne', 'thiswillnotflylater'), "good password fails for unverified user";
+ok !$user_model->validate_login('TestUserOne', 'thiswillnotflylater88%Q'), "good password fails for unverified user";
 $user_model->set_verified('TestUserOne');
-ok $user_model->validate_login('TestUserOne', 'thiswillnotflylater'), "good password works for verified user";
+ok $user_model->validate_login('TestUserOne', 'thiswillnotflylater88%Q'), "good password works for verified user";
 
 done_testing();

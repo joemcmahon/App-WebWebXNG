@@ -25,12 +25,12 @@ my $user_model = WebWebXNG::Model::User->new(sqlite => $app->sqlite);
 ok $user_model, "got user model";
 
 # Adding a user works, and the added user exists.
-my $result = $user_model->add("TestUserOne", "Test", "User", "test\@example.com", "thiswillnotflylater");
+my $result = $user_model->add("TestUserOne", "Test", "User", "test\@example.com", "thiswillnotflylater77Z!");
 ok $result, "user was added successfully";
 ok defined $user_model->exists("TestUserOne"), "exists confirms";
 
 # Can add another user with the same email.
-$result = $user_model->add("TestUserAdmin", "Test", "User", "test\@example.com", "thiswillnotflylater");
+$result = $user_model->add("TestUserAdmin", "Test", "User", "test\@example.com", "thiswillnotflylater77Z!");
 ok $result, "user was added successfully";
 ok defined $user_model->exists("TestUserAdmin"), "exists confirms";
 
