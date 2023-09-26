@@ -1,6 +1,10 @@
 package WebWebXNG::LinkSyntax;
 use Mojo::Base -base, -signatures;
 
+use Exporter;
+our @ISA = qw(Exporter);
+our @EXPORT = qw(is_valid_linkname);
+
 # LinkPattern is the regular expression which matches page titles.
 our $LinkWord    = "[A-Z][a-z]+";
 our $LinkPattern = "(LinkWord){2,}";
