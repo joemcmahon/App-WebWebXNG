@@ -97,21 +97,20 @@ sub user_registration {
     $name_status = "Unfortunately our wiki is ASCII-centric, and we've done our best to translate your name to ASCII. Using username '$username'";
   }
 
-  my $user = $c->app->users->find_user($username);
+  my $user = $c->app->users->exists($username);
   if ($user) {
-    $c->flash(message => $name_status);
     $c->flash( error => "Username '$username' already exists.");
     $c->redirect_to('register');
   }
 
   # All fields present, user doesn't exist. Add the new user.
-  my $added = $c->app->users->add($username, $first_name, $last_name, $email);
+  my $added = $c->app->users->add($username, $first_name, $last_name, $email, $password);
   if (!$added) {
-    $c->flash( error => 'Error in db query. Please check mysql logs.');
+    $c->flash( error => 'Failed to add your username. Please use the contact form to tell us about it.');
     $c->redirect_to('register');
   };
 
-  $c->flash( message => 'User added to the database successfully.');
+  $c->flash( message => 'Your username has been created. Please check your email for the validation link.');
   $c->redirect_to('register');
 }
 
