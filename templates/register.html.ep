@@ -5,12 +5,36 @@
         <div class="card-header text-center">
             Register your username
         </div>
+      %if ($error) {
+         <div class="error" style="color: red">
+            <small> <%= $error %> </small>
+         </div>
+      %}
+
+      %if ($message) {
+        <div class="error" style="color: green">
+          <small> <%= $message %> </small>
+        </div>
+     %}
         <br /> <br />
         <form method="post" action='/register'>
+             <input class="form-control"
+                   id="first_name"
+                   name="firstName"
+                   size="40"
+                   placeholder="First name"
+             />
             <input class="form-control"
                    id="username"
+                   name="lastName"
+                   size="40"
+                   placeholder="Last name"
+             />
+            <br /> <br />
+           <input class="form-control"
+                   id="username"
                    name="username"
-                   type="email" size="40"
+                   size="80"
                    placeholder="Enter username, or blank for FirstnameLastname"
              />
             <br /> <br />
@@ -31,31 +55,23 @@
              />
             <br /> <br />
             <input class="form-control"
-                   id="first_name"
-                   name="firstName"
+                   id="email"
+                   name="email"
+                   type="email"
                    size="40"
-                   placeholder="First name"
+                   placeholder="Enter email"
              />
+            <br /> <br />
             <input class="form-control"
-                   id="username"
-                   name="lastName"
+                   id="confirm_email"
+                   name="confirm_email"
+                   type="emal"
                    size="40"
-                   placeholder="Last name"
+                   placeholder="Re-enter email"
              />
             <br /> <br />
             <input class="btn btn-primary" type="submit" value="Create new user">
             <br />  <br />
         </form>
-      % if ($error) {
-            <div class="error" style="color: red">
-                <small> <%= $error %> </small>
-            </div>
-        %}
-
-        % if ($message) {
-            <div class="error" style="color: green">
-                <small> <%= $message %> </small>
-            </div>
-        %}
     </div>
 </div>
