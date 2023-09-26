@@ -65,22 +65,10 @@ Should return a status and an error, Go-style; currently just returns an ID
 =cut
 
 sub add($self, $username, $first_name, $last_name, $email, $password) {
-  # TODO: Decide if we want to require that the email is unique.
-  #       con: sock puppets, attempts to evade bans
-  #       pro: admin might want to keep admin privs separate from user privs
-  #            for their account
   # TODO: ban list for emails!
-
-  # For now we're banning multiple accounts from the same email or username.
   return if $self->exists($username);
 
-  my $sql = <<SQL;
-    select id from users
-    where email = ?
-SQL
-  return if $self->sqlite->db->query($sql, $email)->rows;
-
-  # No account with this email or username.
+  # Insert if this user does not exist.
   return $self
     ->sqlite
     ->db
