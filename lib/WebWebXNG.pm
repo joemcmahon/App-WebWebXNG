@@ -23,6 +23,8 @@ Base module; loads config, sets up routes, runs the server.
 
 use Mojo::Base 'Mojolicious', -signatures;
 use Mojo::SQLite;
+use WebWebXNG::Model::User;
+use WebWebXNG::Model::Settings;
 
 # The default page loaded if no page is given.
 has front_page => 'FrontPage';
@@ -48,7 +50,7 @@ sub startup ($self) {
     sqlite => sub { state $sql = Mojo::SQLite->new($sqlite_file) }
   );
   $self->helper(
-    users => sub { state $users = WebWebXNG::Model::Users->new(sqlite => $self->sqlite) }
+    users => sub { state $users = WebWebXNG::Model::User->new(sqlite => $self->sqlite) }
   );
   $self->helper(
     settings => sub { state $settings = WebWebXNG::Model::Settings->new(sqlite => $self->sqlite) }
