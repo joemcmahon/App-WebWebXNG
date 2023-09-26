@@ -40,12 +40,7 @@ Loads the current values of the settings and returns them as a hash.
 =cut
 
 sub load($self) {
-  my $sql = <<SQL;
-    select * from settings where settings.id = ?;
-SQL
-  my $contents = $self->sqlite->db
-    ->query($sql, $self->fixed_id)
-    ->hash;
+  my $contents = $self->_read;
   if (not defined $contents) {
     # Insert record at fixed id, forcing defaults.
     my $contents = {
@@ -54,9 +49,18 @@ SQL
       lock_dir => "",
     };
     $self->sqlite->db->insert('settings', $contents);
-    return $self->load;
+    return $self->_read;
   }
   return $contents;
+}
+
+sub _read($self) {
+  my $sql = <<SQL;
+    select * from settings where settings.id = ?;
+SQL
+  return $self->sqlite->db
+    ->query($sql, $self->fixed_id)
+    ->hash;
 }
 
 =head2 save($settings_hash)
@@ -68,13 +72,13 @@ using insert or update as appropriate.
 
 sub save($self, $settings_hash) {
   my $new_settings = $settings_hash;
-  $new_settings->{id} = $self->fixed_id;
-  my @update_list;
-  for my $key (keys %$new_settings) {
-    push @update_list, {$key => $new_settings->{$key}};
+  # Don't allow multiple sets of settings. We'll update by the fixed ID
+  # anyway, so we don't care if there was an ID here.
+  delete $new_settings->{id};
+  foreach my $k (keys %$new_settings) {
+    $self->sqlite->db->update('settings', {$k => $new_settings->{$k}}, {id => $self->fixed_id});
   }
-  $self->sqlite->db->update('settings', @update_list);
-  return $self->load;
+  return $self->_read;
 }
 
 1;
