@@ -5,6 +5,8 @@ use Mojo::Base -base, -signatures;
 use Carp ();
 use Crypt::Passphrase;
 
+has sqlite => sub { die "SQLite database must be supplied" };
+
 =head1 NAME
 
 WebWebXNG::Model::User - user model methods
@@ -84,6 +86,16 @@ sub set_verification($self, $username) {
     )->rows;
 }
 
+=head2 exists($username)
+
+Returns true if the user exists, false if not.
+
+=cut
+
+sub exists($self, $username) {
+  return $self->_read($username);
+}
+
 =head2 verified($username)
 
 Returns true if the user is verified, false if not.
@@ -134,6 +146,12 @@ sub _hash_password($password) {
       encoder    => 'Argon2',
     );
     return $authenticator->hash_password($password);
+}
+
+sub _read($self, $username) {
+  return $self->sqlite->db
+    ->select('users', {username => $username})
+    ->hash;
 }
 1;
 
