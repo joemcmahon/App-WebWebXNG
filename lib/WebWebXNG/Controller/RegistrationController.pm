@@ -3,6 +3,7 @@ use Mojo::Base 'Mojolicious::Controller', -signatures;
 
 use Try::Tiny;
 use WebWebXNG::Model::User;
+use WebWebXNG::LinkSyntax qw(is_valid_linkname);
 use Text::Unidecode;
 
 =head1 NAME
@@ -37,23 +38,34 @@ sub user_registration {
   my $password = $c->param('password');
   my $confirm_password = $c->param('confirm_password');
   my $first_name = $c->param('firstName');
-  my $middle_name = $c->param('middleName');
   my $last_name = $c->param('lastName');
   my $email = $c->param("email");
-  my $verify = $c->param("email_verify");
+  my $verify = $c->param("confirm_email");
 
-  my @missing = '';
+  my @missing;
   push @missing, 'email' if ! $email;
   push @missing, 'email verification' if ! $verify;
   push @missing, 'password' if ! $password;
   push @missing, 'password confirmation' if ! $confirm_password;
   push @missing, 'first name' if !$first_name;
   push @missing, 'last name' if !$last_name;
+  my $missing;
   if (@missing) {
-    my $final = pop @missing;
-    my $start = join ', ', @missing;
-    my $missing = ucfirst("$start, and $final");
-    $c->flash(error => "$missing fields are missing and are required.");
+    $c->flash(error => join "][", @missing);
+    my $are = "are";
+    my $fields = "fields";
+    if (@missing > 2) {
+      my $final = pop @missing;
+      my $start = join ', ', @missing;
+      $missing = ucfirst("$start, and $final");
+    } elsif (@missing == 2) {
+      $missing = ucfirst(join " and ", @missing);
+    } elsif (@missing) {
+      $missing = "@missing";
+      $are = "is";
+      $fields = "field";
+    }
+    $c->flash(error => "$missing $fields $are missing and $are required.");
     $c->redirect_to('register');
   }
 
@@ -72,14 +84,13 @@ sub user_registration {
   my $name_status = "";
 
   #  1. If the new user supplied a username, see if it meets the wikiname standard.
-  my $checker = WebWebXNG::LinkSyntax->new;
-  $name_is_valid = $checker->is_valid_linkname($username);
+  $name_is_valid = is_valid_linkname($username);
   $name_status = "Using chosen username '$username'";
 
   #  2. If they did not, try the concatenation of first and last as is.
   unless ($name_is_valid) {
     $username = $first_name . $last_name;
-    $name_is_valid = $checker->is_valid_linkname($username);
+    $name_is_valid = is_valid_linkname($username);
     $name_status = "Using username '$username'";
   }
   #  3. If that doesn't work, force the two names into the wikiname standard.
@@ -87,7 +98,7 @@ sub user_registration {
   #          than it looks.
   unless ($name_is_valid) {
     $username = ucfirst(lc($first_name)) . ucfirst(lc($last_name));
-    $name_is_valid = $checker->is_valid_linkname($username);
+    $name_is_valid = is_valid_linkname($username);
     $name_status = "Using username '$username'";
   }
   # 4. If THAT doesn't work, then the user's name probably contains non-ASCII
