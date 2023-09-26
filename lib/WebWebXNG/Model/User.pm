@@ -144,23 +144,14 @@ verified and do not permit a login if they're not.
 =cut
 
 sub validate_login($self, $username, $password) {
-  return 0 unless $self->verified_user($username);
-
-  my $sql = <<SQL;
-    select password_hash from users
-    where users.username = ?
-SQL
-
-  # Usernames are unique, so there will be either 0 or 1 hit.
-  my @users = $self->sqlite->db
-    ->query($sql, $username)->rows;
-  return 0 unless @users;
+  my $user = $self->_read($username);
+  return unless $user->{verified};
 
   my $authenticator =  Crypt::Passphrase->new(
     encoder    => 'Argon2',
   );
   return (
-    $authenticator->verify_password($password, $users[0]) ? $users[0]->id : 0
+    $authenticator->verify_password($password, $user->{password_hash}) ? $user->{id} : 0
   );
 }
 
