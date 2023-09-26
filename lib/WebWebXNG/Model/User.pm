@@ -26,7 +26,7 @@ and removing users (especially removing non-validated users).
 
 =head1 METHODS
 
-=head2 add($username, $first, $last, $password)
+=head2 add($username, $first, $last, $email, $password)
 
 Adds a new user to the database. User's password hash is generated, and the user
 is marked as "not validated"; this prevents random yoyos from registering.
@@ -36,7 +36,7 @@ Should return a status and an error, Go-style; currently just returns an ID
 
 =cut
 
-sub add($self, $username, $first_name, $last_name, $password, $email) {
+sub add($self, $username, $first_name, $last_name, $email, $password) {
   # TODO: Decide if we want to require that the email is unique.
   #       con: sock puppets, attempts to evade bans
   #       pro: admin might want to keep admin privs separate from user privs
@@ -47,11 +47,11 @@ sub add($self, $username, $first_name, $last_name, $password, $email) {
   return if $self->sqlite->db->select(
     'users',
     {email => $email}
-  );
+  )->rows;
   return if $self->sqlite->db->select(
     'users',
     {username => $username}
-  );
+  )->rows;
 
   # No account with this email or username.
   return $self
@@ -63,7 +63,7 @@ sub add($self, $username, $first_name, $last_name, $password, $email) {
         username => $username,
         first_name => $first_name,
         last_name => $last_name,
-        password_hash => hash_password_hash($password),
+        password_hash => _hash_password($password),
         email => $email,
         verified => 0,
       },
@@ -78,7 +78,7 @@ in concert with someother authentication mechanism (e.g.,
 
 =cut
 
-sub set_verification($self, $username) {
+sub set_verified($self, $username) {
   return $self->sqlite->db
     ->update('users',
       {verified => 1},
@@ -96,16 +96,16 @@ sub exists($self, $username) {
   return $self->_read($username);
 }
 
-=head2 verified($username)
+=head2 is_verified($username)
 
 Returns true if the user is verified, false if not.
 
 =cut
 
-sub verified($self, $username) {
+sub is_verified($self, $username) {
   my $sql =<<SQL;
-    select verified from user
-    where user.username = ?
+    select verified from users
+    where username = ?
 SQL
   return $self->sqlite->db
     ->query($sql, $username)->rows;
@@ -123,7 +123,7 @@ sub validate_login($self, $username, $password) {
   return 0 unless $self->verified_user($username);
 
   my $sql = <<SQL;
-    select password_hash from user
+    select password_hash from users
     where user.username = ?
 SQL
 

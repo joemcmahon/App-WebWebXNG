@@ -28,4 +28,16 @@ ok $user_model, "got user model";
 my $user = $user_model->exists("blorg");
 ok  !defined($user), "nonexistent user detected correctly";
 
+# 2. Adding a user works, and the added user exists.
+my $result = $user_model->add("TestUserOne", "Test", "User", "test\@example.com", "thiswillnotflylater");
+ok $result, "user was added successfully";
+ok defined $user_model->exists("TestUserOne"), "exists confirms";
+
+# 2.1 Adding a user with the same username fails.
+# 2.2 Adding a user with the same email address fails.
+# 3. Newly-added users are not verified.
+ok !$user_model->is_verified("TestUserOne"), "initially not verified";
+# 4. Password hashing works.
+# 5. Marking a user as verified works.
+
 done_testing();
