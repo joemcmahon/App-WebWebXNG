@@ -29,4 +29,9 @@ my $result = $user_model->add("TestUserOne", "Test", "User", "test\@example.com"
 ok $result, "user was added successfully";
 ok defined $user_model->exists("TestUserOne"), "exists confirms";
 
+# Can add another user with the same email.
+$result = $user_model->add("TestUserAdmin", "Test", "User", "test\@example.com", "thiswillnotflylater");
+ok $result, "user was added successfully";
+ok defined $user_model->exists("TestUserAdmin"), "exists confirms";
+
 done_testing();
