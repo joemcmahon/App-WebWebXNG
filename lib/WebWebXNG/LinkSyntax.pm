@@ -6,9 +6,9 @@ our @ISA = qw(Exporter);
 our @EXPORT = qw(is_valid_linkname);
 
 # LinkPattern is the regular expression which matches page titles.
-our $LinkWord    = "[A-Z][a-z]+";
-our $LinkPattern = "(LinkWord){2,}";
-our $TickedOrNot = "``$LinkPattern|$LinkPattern";
+our $LinkWord    = qr/[A-Z][a-z]+/;
+our $LinkPattern = qr/($LinkWord){2,}/;
+our $TickedOrNot = qr/``$LinkPattern|$LinkPattern/;
 
 =head1 NAME
 
@@ -28,5 +28,5 @@ Returns true if this string is a valid wiki linkword, false if not.
 =cut
 
 sub is_valid_linkname($word) {
-  return $word =~ $LinkPattern;
+  return $word =~ qr/\A$LinkPattern\z/ ? 1 : 0;
 }
