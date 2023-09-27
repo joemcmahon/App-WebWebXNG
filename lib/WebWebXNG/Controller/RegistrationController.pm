@@ -35,11 +35,11 @@ Actually register the user in the database. Reports any errors.
 sub user_registration($c) {
 
   my %fields = (
+    first_name    => $c->param('firstName'),
+    last_name     => $c->param('lastName'),
     username      => $c->param('username'),
     password      => $c->param('password'),
     confirm_pwd   => $c->param('confirm_password'),
-    first_name    => $c->param('firstName'),
-    last_name     => $c->param('lastName'),
     email         => $c->param("email"),
     confirm_email => $c->param("confirm_email"),
   );
@@ -86,12 +86,12 @@ message diagnosing the problem(s) if not.
 
 sub fields_are_missing(%fields) {
   my @missing;
-  push @missing, 'email' if ! $fields{email};
-  push @missing, 'email verification' if ! $fields{verify};
-  push @missing, 'password' if ! $fields{password};
-  push @missing, 'password confirmation' if ! $fields{confirm_pwd};
   push @missing, 'first name' if !$fields{first_name};
   push @missing, 'last name' if !$fields{last_name};
+  push @missing, 'password' if ! $fields{password};
+  push @missing, 'password confirmation' if ! $fields{confirm_pwd};
+  push @missing, 'email' if ! $fields{email};
+  push @missing, 'email confirmation' if ! $fields{verify};
   my $message;
   if (@missing) {
     my $are = "are";
@@ -107,10 +107,10 @@ sub fields_are_missing(%fields) {
       $are = "is";
       $fields = "field";
     }
-    return $message;
+    return ucfirst $message;
   }
   # Make sure validation fields were supplied and accurate.
-  if ($fields{email} ne $fields{confirm_email}) {
+  if ($fields{email} ne $fields{verify}) {
     $message = 'Email and email verification must match.';
   }
   if ($fields{password} ne $fields{confirm_pwd}) {
@@ -147,9 +147,14 @@ sub build_username(%fields) {
   my $name_is_valid = 0;
   my $name_status = "";
 
+  # Eliminate any spaces or non-alpha characters.
   my $username = $fields{username};
   my $first_name = $fields{first_name};
+  $first_name =~ s/\s+//g;
+  $first_name =~ s/[[:digit:]]//g;
   my $last_name = $fields{last_name};
+  $last_name =~ s/\s+//g;
+  $last_name =~ s/[[:digit:]]//g;
 
   #  1. If the new user supplied a username,
   #     see if it meets the wikiname standard.
@@ -184,8 +189,14 @@ sub build_username(%fields) {
   #    XXX: Same here. If someone doesn't like the ASCIIfication,
   #         we can rename their account later.
   unless ($name_is_valid) {
+    $first_name = ucfirst(lc(unidecode($first_name)));
+    $first_name =~ s/\s(.)/uc($1)/ge;
+    $last_name = ucfirst(lc(unidecode($last_name)));
+    $last_name =~ s/\s(.)/uc($1)/ge;
+
     $username = ucfirst(lc(unidecode($first_name)))
               . ucfirst(lc(unidecode($last_name)));
+    $username =~ s/\s//g;
     $name_status = "Unfortunately our wiki is ASCII-centric, so we've done our best to translate your name to ASCII. Using username '$username'";
   }
   return $username, $name_status . " Check your email for the validation link.";
