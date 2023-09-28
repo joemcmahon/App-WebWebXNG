@@ -59,15 +59,15 @@
                    name="email"
                    type="email"
                    size="40"
-                   placeholder="Enter email"
+                   placeholder="Enter email address"
              />
             <br /> <br />
             <input class="form-control"
                    id="confirm_email"
                    name="confirm_email"
-                   type="emal"
+                   type="email"
                    size="40"
-                   placeholder="Re-enter email"
+                   placeholder="Re-enter email address"
              />
             <br /> <br />
             <input class="btn btn-primary" type="submit" value="Create new user">

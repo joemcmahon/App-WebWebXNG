@@ -69,7 +69,7 @@ sub user_registration($c) {
     $c->redirect_to('register');
   };
 
-  $c->flash( message => $name_status);
+  $c->flash( message => $name_status ." missing.");
   $c->redirect_to('register');
 }
 
